@@ -135,7 +135,7 @@ const FIREBASE_CONFIG={
   messagingSenderId: "442609192332",
   appId: "1:442609192332:web:5b2cfa09b1b20aee41daa9"
 };
-const URL_APP=""; // indirizzo pubblico dell'app, es. https://nome.github.io/cosa-mangio/
+const URL_APP="https://matteo09avogadri-ai.github.io/What-To-Eat/"; // indirizzo pubblico dell'app
 const online=typeof firebase!=="undefined";
 let db=null; if(online){firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();}
 
@@ -254,7 +254,7 @@ function baseUrl(){
 function copiaLink(){
   const base=baseUrl();
   if(!base){alert("Metti prima l'app online per creare un link d'invito.");return}
-  ultimoInvito=`Entra nella famiglia "${nomeFam||act}" su Cosa mangio: ${base}?famiglia=${act}`;
+  ultimoInvito=`Entra nella famiglia "${nomeFam||act}" su Cosa mangio: ${base}?famiglia=${act}\nCodice famiglia: ${act}`;
   if(navigator.share){navigator.share({text:ultimoInvito}).catch(()=>{});return}
   apri(`<h2 style="margin-top:0">Invita un familiare</h2><a class="b w" style="display:block;text-align:center;text-decoration:none" target="_blank" href="https://wa.me/?text=${encodeURIComponent(ultimoInvito)}">Invia su WhatsApp</a><button class="g" style="width:100%;margin-top:8px" onclick="navigator.clipboard.writeText(ultimoInvito);chiudi();toast('Link copiato')">Copia il link</button>`);
 }
