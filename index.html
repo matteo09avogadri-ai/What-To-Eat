@@ -9,8 +9,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
-:root{--bg:#F5F8EE;--ink:#1D2B1A;--soft:#5E6D58;--card:#FFFFFF;--line:#D9E2CC;--green:#2F6B3A;--saffron:#F2B705;--red:#B8402F;--ok:#E3F1DA;--no:#FBE7E2;--wbg:#FFF1BF;--wink:#7A5B00}
-@media (prefers-color-scheme:dark){:root{--bg:#141C12;--ink:#EAF1E1;--soft:#9AAB92;--card:#1E2A1B;--line:#33442E;--green:#7FC48A;--red:#EE8A78;--ok:#25391F;--no:#3E2420;--wbg:#3F3410;--wink:#F2C94C}}
+:root{--bg:#F5F8EE;--ink:#1D2B1A;--soft:#5E6D58;--card:#FFFFFF;--line:#D9E2CC;--green:#2F6B3A;--saffron:#F2B705;--red:#B8402F;--ok:#E3F1DA;--no:#FBE7E2;--wbg:#FFF1BF;--wink:#7A5B00;--fbg:#E6EEFB;--fink:#2E4A78}
+@media (prefers-color-scheme:dark){:root{--bg:#141C12;--ink:#EAF1E1;--soft:#9AAB92;--card:#1E2A1B;--line:#33442E;--green:#7FC48A;--red:#EE8A78;--ok:#25391F;--no:#3E2420;--wbg:#3F3410;--wink:#F2C94C;--fbg:#22304A;--fink:#9DB9E8}}
 *{box-sizing:border-box}
 html,body{margin:0;overscroll-behavior-y:contain}
 body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif;font-size:16px;line-height:1.4;min-height:100%}
@@ -41,14 +41,20 @@ input::placeholder{color:#9AA79A}
 .ing{display:inline-block;padding:4px 10px;margin:3px 4px 0 0;border-radius:8px;font-size:15px;font-weight:700}
 .ing.y{background:var(--ok);color:var(--green)}.ing.n{background:var(--no);color:var(--red)}.ing.a{background:var(--wbg);color:var(--wink)}
 .empty{color:var(--soft);padding:10px 0}
-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
-th,td{border:1px solid var(--line);padding:4px 3px;vertical-align:middle;text-align:center;word-wrap:break-word}
-th{background:var(--card)}
-td{background:var(--card);height:52px}
-td.has{background:var(--ok);font-weight:700}
-td div{margin:2px 0;border-radius:6px}td div.sa{background:var(--wbg)}td div.sn{background:var(--no)}
+table{width:calc(100% + 10px);margin:0 -5px;border-collapse:separate;border-spacing:5px;table-layout:fixed;font-size:12px}
+th{font-weight:700;color:var(--soft);font-size:12px;padding:2px 0;line-height:1.2}
+th.dg{color:var(--ink);font-size:13px}
+th.oggi{color:#1D2B1A;background:var(--saffron);border-radius:10px}
+td{background:var(--card);height:58px;border-radius:12px;padding:4px;vertical-align:middle;text-align:center;word-wrap:break-word;box-shadow:0 1px 4px rgba(40,60,30,.12);transition:transform .12s,background .15s}
+td:active{transform:scale(.96)}
+td.has{background:var(--ok)}
+td.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(40,60,30,.12)}
+td div{margin:2px 0;padding:3px 5px;border-radius:8px;font-weight:700;line-height:1.2}
+td div.sa{background:var(--wbg);color:var(--wink)}td div.sn{background:var(--no);color:var(--red)}td div.sf{background:var(--fbg);color:var(--fink)}
 td .d{text-decoration:line-through;opacity:.5}
-td.nx{outline:3px solid var(--saffron);outline-offset:-3px}
+.pl{color:var(--line);font-size:22px;font-weight:700}
+input.bad{border-color:var(--red);background:var(--no)}
+small.warn{display:block;color:var(--red);font-size:12px;font-weight:700;margin-top:3px}
 .food{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
 .food.lo{background:var(--wbg);border-radius:10px;padding:10px 8px}.food.fi{background:var(--no);border-radius:10px;padding:10px 8px}.food small{color:var(--soft);font-weight:700}
 .food .e{font-size:30px;text-align:center}
@@ -88,17 +94,18 @@ summary{font-weight:700;cursor:pointer}
     <p class="sub">La dispensa è condivisa: tutti i membri della famiglia la vedono e la modificano.</p>
     <button class="b w" style="margin:0 0 6px" onclick="document.getElementById('fd').classList.toggle('hide')">+ Aggiungi cibo</button>
     <div class="card hide" id="fd">
-      <input id="dN" placeholder="Nome (es. uova)">
+      <input id="dN" placeholder="Nome (es. uova)" oninput="dQchk()">
       <input id="dS" type="text" placeholder="Data di scadenza" onfocus="this.type='date'" onblur="if(!this.value)this.type='text'">
-      <input id="dQ" placeholder="Quantità (es. 6, 500 g, 2 cartone di latte)">
+      <input id="dQ" placeholder="Quantità (es. 6, 500 g, 2 cartone di latte)" oninput="dQchk()">
+      <small class="warn" id="dQw"></small>
       <div id="uChips"></div>
       <button class="b w" onclick="addCibo()">Salva</button>
     </div>
     <details class="card"><summary>⚖️ Unità di misura personalizzate</summary>
-      <p class="sub" style="margin-top:8px">Es. "cartone di latte" = 1000 ml, "porzione di biscotti" = 50 g.</p>
+      <p class="sub" style="margin-top:8px">Es. "tazza" = 200 ml · "biscotto" = 7,8 g · "porzione di biscotti" = 10 biscotti. Le unità si possono collegare tra loro.</p>
       <div id="uList"></div>
       <input id="uN" placeholder="Unità personalizzata (es. cartone di latte)">
-      <input id="uV" placeholder="Corrisponde a (es. 1000 ml)">
+      <input id="uV" placeholder="Corrisponde a (es. 1000 ml, oppure 10 biscotti)">
       <button class="b w" onclick="addUnita()">Salva unità</button>
     </details>
     <div id="lista"></div>
@@ -118,8 +125,9 @@ summary{font-weight:700;cursor:pointer}
       <div id="cBan"></div><b>Componi un piatto</b>
       <input id="pN" placeholder="Nome del piatto">
       <p class="sub" style="margin:10px 0 0">Tocca gli ingredienti che hai in dispensa:</p>
-      <div id="pChips"></div><div id="pQty"></div>
-      <input id="pX" placeholder="Altri ingredienti con quantità: pasta 100 g, uova 2">
+      <div id="pChips"></div><div id="pQty"></div><p class="sub" id="pUn" style="margin:8px 0 0"></p>
+      <input id="pX" placeholder="Altri ingredienti con quantità: pasta 100 g, uova 2" oninput="pXchk()">
+      <small class="warn" id="pXw"></small>
       <button class="b w" id="pSalva" onclick="salvaPiatto()">Salva piatto</button>
     </div>
     <h2>I miei piatti</h2>
@@ -177,7 +185,7 @@ const BASE=[
 let utente="",fams=[],act="",piatti=BASE.slice();            // salvati sul telefono
 let membri=[],nomeFam="",dispensa=[],plan=[],proposte=[],unita=[];   // dalla famiglia attiva (online)
 let unsubs=[],pag="home",aperto="",sel=new Map(),controId="",deferred=null,apertoS="",ultimoInvito="";
-let undo=[],nav=[];
+let undo=[],nav=[],editIdx=-1;
 
 function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,fams,act,piatti}))}catch(e){}}
 function carica(){
@@ -192,23 +200,23 @@ const ref=()=>db.collection("famiglie").doc(act);
 const col=n=>ref().collection(n);
 function lun(){const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 const dk=()=>lun()+"|"+utente;
-const ha=i=>{const c=dispensa.find(d=>d.n===i);if(!c)return false;const p=parseQ(c.q);return !p||p.v>0};
-function stato(c){const p=parseQ(c.q);if(!p)return 0;if(p.v<=0)return 2;if(c.m&&p.v<=c.m*0.25)return 1;return 0}   // 0 ok, 1 sta finendo, 2 finito
+const ha=i=>{const c=dispensa.find(d=>d.n===i);if(!c)return false;const p=parseQ(c.q,c.n);return !p||p.v>0};
+function stato(c){const p=parseQ(c.q,c.n);if(!p)return 0;if(p.v<=0)return 2;if(c.m&&p.v<=c.m*0.25)return 1;return 0}   // 0 ok, 1 sta finendo, 2 finito
 function colIng(nome,q){
   const c=dispensa.find(d=>d.n===nome);if(!c)return "n";
-  const p=parseQ(c.q);if(!p)return "y";
+  const p=parseQ(c.q,c.n);if(!p)return "y";
   if(p.v<=0)return "n";
-  const need=parseQ(q&&q[nome]);
+  const need=parseQ(q&&q[nome],nome);
   if(need&&need.u===p.u&&p.v<need.v)return "a";
   return stato(c)===1?"a":"y";
 }
 function worst(e){let w="y";for(const i of e.i){const c=colIng(i,e.q);if(c==="n")return "n";if(c==="a")w="a"}return w}
-const chips=(l,q)=>(l||[]).map(i=>`<span class="ing ${colIng(i,q)}">${esc(i)}</span>`).join("");
+const chips=(l,q)=>(l||[]).map(i=>`<span class="ing ${colIng(i,q)}">${esc(i)}${q&&q[i]?" · "+esc(q[i]):""}</span>`).join("");
 const completo=p=>p.i.every(ha);
 const per=e=>e.per||"tutti";
 const vis=e=>per(e)==="tutti"||per(e)===utente||e.autore===utente;
 const fatto=e=>!!(e.done&&e.done[dk()]);
-const etich=e=>esc(e.p)+(per(e)==="tutti"?"":" · "+(per(e)===utente?"io":esc(per(e))))+(e.fisso?" 📌":"");
+const etich=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(per(e)==="tutti"?"":" · "+(per(e)===utente?"io":esc(per(e))))+(e.fisso?" 📌":"");
 
 // ---- finestre e avvisi interni ----
 function apri(h,c){ensure();$("sheet").className="sheet"+(c?" c":"");$("sheet").innerHTML=h;$("mod").classList.remove("hide")}
@@ -296,8 +304,9 @@ function copiaLink(){
 function addCibo(){
   const n=norm($("dN").value);if(!n){alert("Scrivi il nome del cibo.");return}
   if(!act){alert("Prima entra in una famiglia.");return}
-  const qs=$("dQ").value.trim()||"—",pq=parseQ(qs),C=col("dispensa");C.add({n,s:$("dS").value,q:qs,m:pq?pq.v:null}).then(r=>reg("Cibo aggiunto: "+n,()=>C.doc(r.id).delete()));
-  $("dN").value=$("dS").value=$("dQ").value="";$("dS").type="text";$("fd").classList.add("hide");
+  if(erroreQ($("dQ").value,n)){dQchk();alert("Controlla la quantità in rosso.");return}
+  const qs=$("dQ").value.trim()||"—",pq=parseQ(qs,n),C=col("dispensa");C.add({n,s:$("dS").value,q:qs,m:pq?pq.v:null}).then(r=>reg("Cibo aggiunto: "+n,()=>C.doc(r.id).delete()));
+  $("dN").value=$("dS").value=$("dQ").value="";$("dS").type="text";dQchk();$("fd").classList.add("hide");
 }
 function togliCibo(id){aperto="";const x=dispensa.find(d=>d.id===id);if(!x)return;const C=col("dispensa"),{n,s,q,m}=x;C.doc(id).delete();reg("Cibo tolto: "+n,()=>C.doc(id).set({n,s:s||"",q,m:m==null?null:m}))}
 function testoScad(s){
@@ -316,22 +325,46 @@ function uiDisp(){
 
 // ---- quantità ----
 const stem=s=>s.toLowerCase().trim().replace(/[aeio]\b/g,"");   // cartone/cartoni -> uguali
-function conv(v,u){u=u.toLowerCase();if(u==="kg"){v*=1000;u="g"}else if(u==="gr"||u==="grammi"){u="g"}else if(u==="l"||u==="lt"||u==="litri"){v*=1000;u="ml"}else if(u==="cl"){v*=10;u="ml"}else if(u==="pz"||u==="pezzi"){u=""}return{v,u}}
-function parseQ(s){
+const STD=Object.assign(Object.create(null),{"":[1,""],g:[1,"g"],gr:[1,"g"],grammi:[1,"g"],grammo:[1,"g"],kg:[1000,"g"],ml:[1,"ml"],l:[1,"ml"],lt:[1,"ml"],litri:[1,"ml"],litro:[1,"ml"],cl:[10,"ml"],dl:[100,"ml"],pz:[1,""],pezzi:[1,""],pezzo:[1,""]});
+STD.l=[1000,"ml"];STD.lt=[1000,"ml"];STD.litri=[1000,"ml"];STD.litro=[1000,"ml"];
+function trovaUnita(u,ing){
+  const s=stem(u),ex=unita.find(x=>stem(x.n)===s);if(ex)return ex;
+  const c=unita.filter(x=>stem(x.n).startsWith(s+" "));       // "porzione" -> "porzione di biscotti"
+  if(!c.length)return null;
+  if(ing){const m=c.filter(x=>stem(x.n).includes(stem(ing)));if(m.length)return m[0]}
+  return c.length===1?c[0]:null;
+}
+function risolvi(u,d,ing){
+  u=u.trim().toLowerCase();
+  if(u in STD)return{f:STD[u][0],u:STD[u][1]};
+  if((d||0)>6)return null;
+  const c=trovaUnita(u,ing);if(!c)return null;
+  const m=/^\s*(\d+(?:[.,]\d+)?)\s*(.*)$/.exec(c.t||"");if(!m)return null;
+  const r=risolvi(m[2],(d||0)+1,ing);if(!r)return null;
+  return{f:parseFloat(m[1].replace(",","."))*r.f,u:r.u,c:true};
+}
+function parseQ(s,ing){
   const m=/^\s*(\d+(?:[.,]\d+)?)\s*(.*)$/.exec(s||"");if(!m)return null;
   const v=parseFloat(m[1].replace(",",".")),u=m[2].trim().toLowerCase();
-  const cu=u&&unita.find(x=>stem(x.n)===stem(u));
-  if(cu)return{v:v*cu.v,u:cu.u,ou:u,f:cu.v};
-  const r=conv(v,u);return{v:r.v,u:r.u,f:1};
+  const r=risolvi(u,0,ing)||(ing&&u&&stem(u)===stem(ing)?{f:1,u:""}:null);   // "2 uova" = 2 pezzi
+  if(!r)return null;
+  return{v:v*r.f,u:r.u,ou:r.c?u:undefined,f:r.f};
 }
 const fmtQ=p=>p.ou?Math.round(p.v/p.f*100)/100+" "+p.ou:Math.round(p.v*100)/100+(p.u?" "+p.u:"");
+function erroreQ(s,ing){
+  s=(s||"").trim();if(!s||parseQ(s,ing))return "";
+  const m=/^\d+(?:[.,]\d+)?\s*(.*)$/.exec(s);
+  return m?`Unità "${m[1].trim()}" non riconosciuta: aggiungila nelle unità personalizzate.`:"Scrivi prima un numero, es. 100 g.";
+}
+function dQchk(){const e=erroreQ($("dQ").value,norm($("dN").value));$("dQ").classList.toggle("bad",!!e);$("dQw").textContent=e}
 function addUnita(){
-  const n=norm($("uN").value),t=$("uV").value.trim(),m=/^\s*(\d+(?:[.,]\d+)?)\s*(.*)$/.exec(t);
+  const n=norm($("uN").value),t=$("uV").value.trim().replace(/\s+/g," "),m=/^(\d+(?:[.,]\d+)?)\s*(.*)$/.exec(t);
   if(!act){alert("Prima entra in una famiglia.");return}
   if(!n||!m){alert("Scrivi il nome dell'unità e a quanto corrisponde, es. 1000 ml.");return}
-  const r=conv(parseFloat(m[1].replace(",",".")),m[2].trim());
-  if(!(r.v>0)||!["g","ml",""].includes(r.u)){alert("Usa g, kg, ml o l.");return}
-  const C=col("unita");C.add({n,v:r.v,u:r.u,t}).then(d=>reg("Unità aggiunta: "+n,()=>C.doc(d.id).delete()));
+  const tu=m[2].trim().toLowerCase();
+  if((n in STD)||stem(n)===stem(tu)||!(parseFloat(m[1].replace(",","."))>0)){alert("Nome o equivalenza non valida.");return}
+  if(!risolvi(tu,0)){alert(`Unità "${tu}" sconosciuta: definiscila prima.`);return}
+  const C=col("unita");C.add({n,t}).then(d=>reg("Unità aggiunta: "+n,()=>C.doc(d.id).delete()));
   $("uN").value=$("uV").value="";
 }
 function togliUnita(id){const x=unita.find(u=>u.id===id);if(!x)return;const C=col("unita"),d=Object.assign({},x);delete d.id;C.doc(id).delete();reg("Unità tolta: "+x.n,()=>C.doc(id).set(d))}
@@ -344,8 +377,8 @@ function usa(e){
   const C=col("dispensa"),inv=[];
   for(const nome of e.i){
     const c=dispensa.find(d=>d.n===nome);if(!c)continue;
-    const p=parseQ(c.q);if(!p)continue;
-    let q=parseQ(e.q&&e.q[nome]);if(!q||q.u!==p.u)q={v:1,u:p.u};
+    const p=parseQ(c.q,c.n);if(!p)continue;
+    let q=parseQ(e.q&&e.q[nome],nome);if(!q||q.u!==p.u)q={v:1,u:p.u};
     const orig={n:c.n,s:c.s||"",q:c.q,m:c.m==null?null:c.m};
     p.v=Math.max(0,p.v-q.v);
     C.doc(c.id).update({q:fmtQ(p)});   // a zero resta in lista, in rosso
@@ -356,11 +389,13 @@ function usa(e){
 
 // ---- planner condiviso ----
 const cellaE=k=>plan.filter(e=>e.slot===k&&vis(e)&&(e.fisso||e.sett===lun()));
+const PI={colazione:"☀️",pranzo:"🍝",cena:"🌙"};
 function tabHtml(get,click,nx){
-  let h="<tr><th></th>"+PP.map(p=>`<th>${p[0].toUpperCase()+p.slice(1)}</th>`).join("")+"</tr>";
-  for(let g=0;g<7;g++){h+=`<tr><th>${GG[g]}</th>`;
+  const oggi=(new Date().getDay()+6)%7;
+  let h="<tr><th></th>"+PP.map(p=>`<th>${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</th>`).join("")+"</tr>";
+  for(let g=0;g<7;g++){h+=`<tr><th class="dg ${click&&g===oggi?'oggi':''}">${GG[g]}</th>`;
     for(const p of PP){const k=g+"-"+p,es=get(k);
-      h+=`<td class="${es.length?'has':''} ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.map(e=>`<div class="${fatto(e)?'d':click?'s'+worst(e):''}">${etich(e)}</div>`).join("")}</td>`}
+      h+=`<td class="${es.length?'has':''} ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="${fatto(e)?'d':e.fuori?'sf':click?'s'+worst(e):''}">${etich(e)}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</td>`}
     h+="</tr>"}
   return h;
 }
@@ -377,28 +412,29 @@ function uiHome(){
 function completato(id){
   const e=plan.find(x=>x.id===id);if(!e)return;
   const R=col("planner"),fp=new firebase.firestore.FieldPath("done",dk());
-  const rip=!Object.keys(e.done||{}).some(k=>k.startsWith(lun()+"|"))?usa(e):null;   // ingredienti scalati una sola volta
+  const rip=!e.fuori&&!Object.keys(e.done||{}).some(k=>k.startsWith(lun()+"|"))?usa(e):null;   // ingredienti scalati una sola volta
   R.doc(id).update(fp,true);
   reg("Pasto completato: "+e.p,()=>{R.doc(id).update(fp,firebase.firestore.FieldValue.delete());return rip?rip():null});
 }
 function cella(k){
   if(!act){alert("Prima entra in una famiglia.");return}
   const[g,p]=k.split("-");
-  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>`<div class="m"><span class="n">${etich(e)}</span><button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button></div>`).join("")+`<button class="b w" onclick="scegli('${k}')">➕ Aggiungi un piatto</button>`);
+  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>`<div class="m"><span class="n">${etich(e)}</span><button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button></div>`).join("")+`<button class="b w" onclick="scegli('${k}')">➕ Aggiungi un piatto</button><button class="g" style="width:100%;margin-top:8px" onclick="opzioni('${k}',-1)">🍴 Pasto fuori casa</button>`);
 }
 function togliPlan(id){const e=plan.find(x=>x.id===id);if(!e)return;const R=col("planner"),d=Object.assign({},e);delete d.id;R.doc(id).delete();reg("Piatto tolto: "+e.p,()=>R.doc(id).set(d))}
 function scegli(k){
   apri(`<h2 style="margin-top:0">Scegli un piatto</h2>`+piatti.map((x,i)=>`<div class="card" onclick="opzioni('${k}',${i})"><b>${esc(x.n)}</b> ${completo(x)?'<span class="ing y">hai tutto</span>':''}<div>${chips(x.i,x.q)}</div></div>`).join(""));
 }
 function opzioni(k,i){
-  apri(`<h2 style="margin-top:0">${esc(piatti[i].n)}</h2>
+  apri(`<h2 style="margin-top:0">${i<0?"🍴 Pasto fuori casa":esc(piatti[i].n)}</h2>${i<0?'<input id="aNote" placeholder="Dove? (facoltativo)" style="margin-top:0">':""}
   <label class="l">Per chi?<select id="aPer"><option value="${esc(utente)}">Solo per me</option><option value="tutti">Per tutti</option>${membri.filter(m=>m!==utente).map(m=>`<option value="${esc(m)}">Solo per ${esc(m)}</option>`).join("")}</select></label>
   <label class="l">Quando?<select id="aRip"><option value="0">Solo questa settimana</option><option value="1">📌 Fisso ogni settimana</option><option value="2">📌 Fisso tutti i giorni (questo pasto)</option></select></label>
   <button class="b w" onclick="aggiungiPlan('${k}',${i})">Aggiungi</button>`);
 }
 function aggiungiPlan(k,i){
-  const pe=$("aPer").value,rip=+$("aRip").value,x=piatti[i],pasto=k.split("-")[1];
-  const base={p:x.n,i:x.i,q:x.q||{},per:pe,autore:utente,fisso:rip>0,sett:rip>0?null:lun(),done:{}};
+  const pe=$("aPer").value,rip=+$("aRip").value,pasto=k.split("-")[1],note=i<0?($("aNote").value||"").trim():"";
+  const x=i<0?{n:"Fuori casa"+(note?": "+note:""),i:[],q:{}}:piatti[i];
+  const base={p:x.n,i:x.i,q:x.q||{},fuori:i<0,per:pe,autore:utente,fisso:rip>0,sett:rip>0?null:lun(),done:{}};
   const b=db.batch(),R=col("planner"),refs=[];
   (rip===2?GG.map((_,g)=>g+"-"+pasto):[k]).forEach(sl=>{const r=R.doc();refs.push(r);b.set(r,Object.assign({slot:sl},base))});
   b.commit().then(()=>{chiudi();reg("Aggiunto al planner: "+x.n,()=>{const d=db.batch();refs.forEach(r=>d.delete(r));return d.commit()})}).catch(()=>alert("Non riesco ad aggiungere."));
@@ -414,26 +450,47 @@ function uiStor(){
 // ---- piatti personali ----
 function uiPiatti(){
   const pr=proposte.find(p=>p.id===controId);
-  $("cBan").innerHTML=controId?`<div style="background:var(--saffron);color:#1D2B1A;border-radius:10px;padding:10px;margin-bottom:10px"><b>Controproposta</b>${pr?" a "+esc(pr.n)+" di "+esc(pr.autore):""}<br><button class="g" style="margin-top:6px" onclick="controId='';uiPiatti()">Annulla</button></div>`:"";
-  $("pSalva").textContent=controId?"Salva e invia controproposta":"Salva piatto";
+  $("cBan").innerHTML=controId?`<div style="background:var(--saffron);color:#1D2B1A;border-radius:10px;padding:10px;margin-bottom:10px"><b>Controproposta</b>${pr?" a "+esc(pr.n)+" di "+esc(pr.autore):""}<br><button class="g" style="margin-top:6px" onclick="controId='';uiPiatti()">Annulla</button></div>`:(editIdx>=0&&piatti[editIdx]?`<div style="background:var(--wbg);color:var(--wink);border-radius:10px;padding:10px;margin-bottom:10px"><b>Stai modificando:</b> ${esc(piatti[editIdx].n)}<br><button class="g" style="margin-top:6px" onclick="annullaMod()">Annulla</button></div>`:"");
+  $("pSalva").textContent=controId?"Salva e invia controproposta":editIdx>=0?"Salva modifiche":"Salva piatto";
+  $("pUn").textContent=unita.length?"Unità personalizzate: "+unita.map(x=>x.n).join(", "):"";
   $("pChips").innerHTML=dispensa.length?dispensa.map(c=>`<button class="g ${sel.has(c.id)?'on':''}" style="margin:4px 6px 0 0" onclick="tog('${c.id}')">${emoji(c.n)} ${esc(c.n)}</button>`).join(""):'<p class="empty">La dispensa è vuota: scrivi gli ingredienti qui sotto.</p>';
-  $("pQty").innerHTML=[...sel].map(([id,q])=>{const c=dispensa.find(x=>x.id===id);return c?`<div class="m"><span class="n">${emoji(c.n)} ${esc(c.n)}<br><small style="font-weight:400;color:var(--soft)">In dispensa: ${esc(c.q)}</small></span><input style="width:130px;margin:0" placeholder="Quantità es. 100 g" value="${esc(q)}" oninput="sel.set('${id}',this.value)"></div>`:""}).join("");
-  $("pList").innerHTML=piatti.map((x,i)=>`<div class="card"><b>${esc(x.n)}</b><div>${chips(x.i,x.q)}</div><button class="b" style="margin-top:10px" onclick="invia(${i})">Proponi alla famiglia</button> <button class="g r" onclick="togliPiatto(${i})">Elimina</button></div>`).join("");
+  $("pQty").innerHTML=[...sel].map(([id,q])=>{const c=dispensa.find(x=>x.id===id);if(!c)return "";const e=erroreQ(q,c.n);return `<div class="m" style="align-items:flex-start"><span class="n">${emoji(c.n)} ${esc(c.n)}<br><small style="font-weight:400;color:var(--soft)">In dispensa: ${esc(c.q)}</small></span><div style="width:150px"><input class="${e?"bad":""}" style="margin:0" placeholder="es. 100 g" value="${esc(q)}" oninput="qIn('${id}',this)"><small class="warn">${esc(e)}</small></div></div>`}).join("");
+  $("pList").innerHTML=piatti.map((x,i)=>`<div class="card"><b>${esc(x.n)}</b><div>${chips(x.i,x.q)}</div><button class="b" style="margin-top:10px" onclick="invia(${i})">Proponi alla famiglia</button> <button class="g" onclick="modifica(${i})">✏️ Modifica</button> <button class="g r" onclick="togliPiatto(${i})">Elimina</button></div>`).join("");
 }
 function togliPiatto(i){const x=piatti.splice(i,1)[0];salva();uiPiatti();reg("Piatto eliminato: "+x.n,()=>{piatti.splice(Math.min(i,piatti.length),0,x);salva();uiPiatti()})}
-function defPorz(c){let d=porz(c.n);const p=parseQ(c.q),pd=parseQ(d);if(p&&pd&&p.u!==pd.u)d=p.u===""?"1":"";return d}
+function defPorz(c){let d=porz(c.n);const p=parseQ(c.q,c.n),pd=parseQ(d,c.n);if(p&&pd&&p.u!==pd.u)d=p.u===""?"1":"";return d}
 function tog(id){if(sel.has(id))sel.delete(id);else{const c=dispensa.find(x=>x.id===id);sel.set(id,c?defPorz(c):"")}uiPiatti()}
+function analizzaExtra(){
+  const items=[];let err="";
+  $("pX").value.split(",").map(x=>x.trim()).filter(Boolean).forEach(x=>{
+    const m=/^(.*?)\s+(\d.*)$/.exec(x),n=norm(m?m[1]:x),q=m?m[2].trim():porz(n);
+    const e=m?erroreQ(q,n):"";if(e&&!err)err=e;
+    items.push({n,q});
+  });
+  return{items,err};
+}
+function pXchk(){const r=analizzaExtra();$("pX").classList.toggle("bad",!!r.err);$("pXw").textContent=r.err}
+function qIn(id,el){const c=dispensa.find(x=>x.id===id);sel.set(id,el.value);const e=c?erroreQ(el.value,c.n):"";el.classList.toggle("bad",!!e);el.nextElementSibling.textContent=e}
+function modifica(i){
+  const x=piatti[i];editIdx=i;controId="";sel.clear();const extra=[];
+  x.i.forEach(n=>{const c=dispensa.find(d=>d.n===n),q=(x.q&&x.q[n])||"";if(c)sel.set(c.id,q);else extra.push(q?n+" "+q:n)});
+  $("pN").value=x.n;$("pX").value=extra.join(", ");
+  pXchk();uiPiatti();scrollTo(0,0);
+}
+function annullaMod(){editIdx=-1;sel.clear();$("pN").value=$("pX").value="";pXchk();uiPiatti()}
 function salvaPiatto(){
-  const n=$("pN").value.trim();
-  if([...sel.values()].some(v=>!v.trim())){alert("Scrivi la quantità per ogni ingrediente scelto.");return}
-  const q={};
-  const extra=$("pX").value.split(",").map(x=>x.trim()).filter(Boolean).map(x=>{const m=/^(.*?)\s+(\d.*)$/.exec(x);if(m){q[norm(m[1])]=m[2];return norm(m[1])}const d=porz(norm(x));if(d)q[norm(x)]=d;return norm(x)});
-  const ing=[];for(const[id,qq]of sel){const c=dispensa.find(x=>x.id===id);if(c){q[c.n]=qq.trim();ing.push(c.n)}}
-  ing.push(...extra);
+  const n=$("pN").value.trim(),r=analizzaExtra();let err=r.err;
+  for(const[id,v]of sel){const c=dispensa.find(x=>x.id===id);if(!v.trim()){alert("Scrivi la quantità per ogni ingrediente scelto.");return}if(c&&erroreQ(v,c.n))err=err||"1"}
+  if(err){uiPiatti();pXchk();alert("Controlla le quantità in rosso: unità non riconosciuta.");return}
+  const q={},ing=[];
+  for(const[id,qq]of sel){const c=dispensa.find(x=>x.id===id);if(c){q[c.n]=qq.trim();ing.push(c.n)}}
+  r.items.forEach(t=>{ing.push(t.n);if(t.q)q[t.n]=t.q});
   if(!n||!ing.length){alert("Scrivi il nome e scegli almeno un ingrediente.");return}
-  const x={n,i:[...new Set(ing)],q};piatti.push(x);sel.clear();$("pN").value=$("pX").value="";salva();
+  const x={n,i:[...new Set(ing)],q},mod=editIdx>=0?piatti[editIdx]:null;
+  if(mod){const j=editIdx;piatti[j]=x;editIdx=-1;reg("Piatto modificato: "+n,()=>{piatti[j]=mod;salva();uiPiatti()})}
+  else{piatti.push(x);if(!controId)reg("Piatto salvato: "+n,()=>{const j=piatti.indexOf(x);if(j>=0)piatti.splice(j,1);salva();uiPiatti()})}
+  sel.clear();$("pN").value=$("pX").value="";pXchk();salva();
   if(controId){const id=controId;controId="";inviaContro(id,x);vai("famiglia");return}
-  reg("Piatto salvato: "+n,()=>{const j=piatti.indexOf(x);if(j>=0)piatti.splice(j,1);salva();uiPiatti()});
   uiPiatti();
 }
 
