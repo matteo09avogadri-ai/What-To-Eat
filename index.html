@@ -111,6 +111,7 @@ summary{font-weight:700;cursor:pointer}
     <div id="lista"></div>
   </section>
   <section id="p-famiglia" class="hide">
+    <div id="notif"></div>
     <div id="famList"></div>
     <details class="card"><summary>➕ Crea o entra in un'altra famiglia</summary>
       <input id="cNome" placeholder="Nome della nuova famiglia">
@@ -251,17 +252,60 @@ function avvia(){
   attiva();
 }
 
+// ---- notifiche (mentre l'app è aperta o in background) ----
+let primoP=true,visti={};
+const nsup=()=>"Notification" in window;
+function notifica(titolo,testo,forza){
+  try{navigator.vibrate&&navigator.vibrate([150,80,150])}catch(e){}
+  if(document.visibilityState==="visible"&&!forza){toast(titolo+": "+testo);return}
+  if(!nsup()||Notification.permission!=="granted")return;
+  const o={body:testo,icon:"icon-192.png",badge:"icon-192.png",tag:"cm-"+Date.now(),vibrate:[150,80,150]};
+  const fb=()=>{try{new Notification(titolo,o)}catch(e){}};
+  if(navigator.serviceWorker&&navigator.serviceWorker.ready)navigator.serviceWorker.ready.then(r=>r.showNotification(titolo,o)).catch(fb);else fb();
+}
+function attivaNotif(){
+  if(!nsup())return;
+  Notification.requestPermission().then(p=>{draw();if(p==="granted")notifica("🔔 Notifiche attive","Riceverai un avviso per proposte e risposte.",true)});
+}
+function uiNotif(){
+  const el=$("notif");if(!el)return;
+  let h;
+  if(!nsup())h='<p class="sub">Questo dispositivo o questa app non supporta le notifiche. Prova ad aprire l\'app dal browser Chrome.</p>';
+  else if(Notification.permission==="granted")h='<div class="m"><span class="n">🔔 Notifiche attive</span><button class="g" onclick="notifica(\'🔔 Prova\',\'Le notifiche funzionano!\',true)">Prova</button></div>';
+  else if(Notification.permission==="denied")h='<p class="sub">🔕 Notifiche bloccate: attivale dalle impostazioni del browser o dell\'app per questo sito.</p>';
+  else h='<button class="b w" style="margin:0 0 6px" onclick="attivaNotif()">🔔 Attiva le notifiche</button>';
+  el.innerHTML=h;
+}
+function controllaProposte(sn){
+  const pronto=!primoP;
+  sn.docChanges().forEach(ch=>{
+    const p=Object.assign({id:ch.doc.id},ch.doc.data());
+    if(pronto&&!ch.doc.metadata.hasPendingWrites){
+      if(ch.type==="added"){
+        if(p.autore!==utente&&(per(p)==="tutti"||per(p)===utente))
+          notifica(p.rif?"💬 Controproposta":"🍽️ Nuova proposta",`${p.autore} ${p.rif?"contropropone":"propone"}: ${p.n}`);
+      }else if(ch.type==="modified"&&p.autore===utente){
+        const old=visti[p.id]||{},nw=p.risposte||{};
+        for(const m in nw){const a=nw[m],b=old[m];
+          if(m!==utente&&a.v!=="contro"&&(!b||b.v!==a.v))notifica("Risposta alla tua proposta",`${m} ${a.v==="si"?"ha accettato":"ha rifiutato"}: ${p.n}`);}
+      }
+    }
+    if(ch.type==="removed")delete visti[p.id];else visti[p.id]=p.risposte||{};
+  });
+  primoP=false;
+}
+
 // ---- famiglie ----
 function attiva(){
-  unsubs.forEach(f=>f());unsubs=[];membri=[];dispensa=[];plan=[];proposte=[];unita=[];nomeFam="";
+  unsubs.forEach(f=>f());unsubs=[];primoP=true;visti={};membri=[];dispensa=[];plan=[];proposte=[];unita=[];nomeFam="";
   if(!online||!act){draw();return}
   const f=fams.find(x=>x.c===act);if(!f&&fams.length){act=fams[0].c;salva()}
   unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
-  const sub=(n,fn)=>unsubs.push(col(n).onSnapshot(sn=>{fn(sn.docs.map(d=>Object.assign({id:d.id},d.data())));draw()}));
+  const sub=(n,fn,on)=>unsubs.push(col(n).onSnapshot(sn=>{if(on)on(sn);fn(sn.docs.map(d=>Object.assign({id:d.id},d.data())));draw()}));
   sub("dispensa",a=>{dispensa=a.sort((x,y)=>x.n.localeCompare(y.n))});
   sub("planner",a=>{plan=a});
   sub("unita",a=>{unita=a});
-  sub("proposte",a=>{proposte=a.sort((x,y)=>y.ts-x.ts)});
+  sub("proposte",a=>{proposte=a.sort((x,y)=>y.ts-x.ts)},controllaProposte);
 }
 function creaFam(nome){
   nome=(nome||"").trim()||"La mia famiglia";
@@ -402,6 +446,7 @@ function tabHtml(get,click,nx){
 function uiHome(){
   const nuove=pend().length;
   $("avviso").innerHTML=(nuove?`<div class="card" style="background:var(--saffron);color:#1D2B1A;font-weight:700" onclick="vai('famiglia')">🔔 ${nuove} ${nuove===1?"proposta da valutare":"proposte da valutare"}</div>`:"")+
+    (nsup()&&Notification.permission==="default"?`<div class="card" style="font-weight:700" onclick="attivaNotif()">🔔 Attiva le notifiche per proposte e risposte</div>`:"")+
     (deferred?`<div class="card" style="background:var(--green);color:#fff;font-weight:700" onclick="installa()">📲 Installa l'app sul telefono</div>`:"");
   const s=(new Date().getDay()+6)%7;let f=null;
   for(let i=0;i<7&&!f;i++){const g=(s+i)%7;for(const p of PP){const es=cellaE(g+"-"+p).filter(e=>!fatto(e));if(es.length){f={g,p,es};break}}}
@@ -553,7 +598,7 @@ function uiFam(){
 function draw(){
   $("av").textContent=utente?utente[0].toUpperCase():"?";
   $("tit").textContent=pag==="home"?(nomeFam||TIT.home):TIT[pag];
-  uiHome();uiDisp();uiFam();uiPiatti();uiStor();uiUnita();uiUndo();
+  uiHome();uiDisp();uiFam();uiPiatti();uiStor();uiUnita();uiNotif();uiUndo();
 }
 function ensure(){if(!history.state||history.state.s!==1)history.pushState({s:1},"")}
 function mostra(p){
