@@ -12,16 +12,17 @@
 :root{--bg:#F5F8EE;--ink:#1D2B1A;--soft:#5E6D58;--card:#FFFFFF;--line:#D9E2CC;--green:#2F6B3A;--saffron:#F2B705;--red:#B8402F;--ok:#E3F1DA;--no:#FBE7E2}
 @media (prefers-color-scheme:dark){:root{--bg:#141C12;--ink:#EAF1E1;--soft:#9AAB92;--card:#1E2A1B;--line:#33442E;--green:#7FC48A;--red:#EE8A78;--ok:#25391F;--no:#3E2420}}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overscroll-behavior-y:contain}
-body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif;font-size:16px;line-height:1.4;padding-top:env(safe-area-inset-top,0px);display:flex;flex-direction:column}
-header{display:flex;align-items:center;gap:12px;padding:12px 16px}
-header h1{flex:1;font-family:Georgia,serif;font-size:22px;margin:0}
+html,body{margin:0;overscroll-behavior-y:contain}
+body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif;font-size:16px;line-height:1.4;min-height:100%}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px}
+header h1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Georgia,serif;font-size:22px;margin:0}
+.ib{padding:6px 11px;font-size:18px;line-height:1.2}
 .av{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;font:700 20px Georgia,serif;display:flex;align-items:center;justify-content:center;flex:none;border:0}
 .av.s{width:34px;height:34px;font-size:16px}
-main{flex:1;overflow-y:auto;overscroll-behavior-y:contain;padding:4px 16px 24px}
+main{padding:4px 16px calc(100px + env(safe-area-inset-bottom,0px))}
 h2{font-family:Georgia,serif;font-size:19px;margin:20px 0 8px}
 p.sub{margin:0 0 12px;color:var(--soft);font-size:14px}
-nav{display:flex;border-top:1px solid var(--line);background:var(--card);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;border-top:1px solid var(--line);background:var(--card);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav button{flex:1;padding:8px 4px;border:0;background:none;color:var(--soft);font:inherit;font-size:12px;font-weight:700}
 nav button span{display:block;font-size:24px;filter:grayscale(1);opacity:.55}
 nav button.on{color:var(--green);box-shadow:inset 0 3px 0 var(--saffron)}
@@ -58,6 +59,7 @@ td.nx{outline:3px solid var(--saffron);outline-offset:-3px}
 .m span.n{flex:1;font-weight:700}
 .cp{margin:0 0 0 18px;border-left:4px solid var(--saffron);padding-left:10px}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#1D2B1A;color:#fff;padding:10px 18px;border-radius:22px;font-size:15px;z-index:20;max-width:90%;text-align:center;display:none}
+.toast b{margin-left:12px;color:var(--saffron);cursor:pointer}
 .hide{display:none!important}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:9;overscroll-behavior:contain}
 .sheet{background:var(--bg);width:100%;max-width:520px;max-height:80%;overflow-y:auto;overscroll-behavior:contain;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
@@ -70,7 +72,9 @@ summary{font-weight:700;cursor:pointer}
 <header>
   <button class="av" id="av" onclick="cambiaNome()"></button>
   <h1 id="tit" onclick="vai('famiglia')">Cosa mangio</h1>
-  <button class="g hide" id="home" onclick="vai('home')">Home</button>
+  <button class="g ib hide" id="un" onclick="annulla()" aria-label="Annulla">↶</button>
+  <button class="g ib" onclick="aggiorna()" aria-label="Aggiorna">↻</button>
+  <button class="g ib hide" id="home" onclick="vai('home')" aria-label="Home">🏠</button>
 </header>
 <main>
   <section id="p-home">
@@ -159,6 +163,7 @@ const BASE=[
 let utente="",fams=[],act="",piatti=BASE.slice();            // salvati sul telefono
 let membri=[],nomeFam="",dispensa=[],plan=[],proposte=[];   // dalla famiglia attiva (online)
 let unsubs=[],pag="home",aperto="",sel=new Map(),controId="",deferred=null,apertoS="",ultimoInvito="";
+let undo=[],nav=[];
 
 function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,fams,act,piatti}))}catch(e){}}
 function carica(){
@@ -183,11 +188,15 @@ const fatto=e=>!!(e.done&&e.done[dk()]);
 const etich=e=>esc(e.p)+(per(e)==="tutti"?"":" · "+(per(e)===utente?"io":esc(per(e))))+(e.fisso?" 📌":"");
 
 // ---- finestre e avvisi interni ----
-function apri(h,c){$("sheet").className="sheet"+(c?" c":"");$("sheet").innerHTML=h;$("mod").classList.remove("hide")}
+function apri(h,c){ensure();$("sheet").className="sheet"+(c?" c":"");$("sheet").innerHTML=h;$("mod").classList.remove("hide")}
 function chiudi(){$("mod").classList.add("hide")}
 let _tt=null;
-function toast(m){let t=$("toast");if(!t){t=document.createElement("div");t.id="toast";t.className="toast";document.body.appendChild(t)}t.textContent=m;t.style.display="block";clearTimeout(_tt);_tt=setTimeout(()=>{t.style.display="none"},2600)}
+function toast(m,az){let t=$("toast");if(!t){t=document.createElement("div");t.id="toast";t.className="toast";document.body.appendChild(t)}t.innerHTML=esc(m)+(az?'<b onclick="annulla()">Annulla</b>':"");t.style.display="block";clearTimeout(_tt);_tt=setTimeout(()=>{t.style.display="none"},az?6000:2600)}
 window.alert=toast;
+function reg(m,inv){undo.push({m,inv});if(undo.length>30)undo.shift();toast(m,true);uiUndo()}
+function annulla(){const a=undo.pop();uiUndo();if(!a)return;Promise.resolve(a.inv()).then(()=>toast("Annullato: "+a.m)).catch(()=>alert("Non riesco ad annullare."))}
+function uiUndo(){$("un").classList.toggle("hide",!undo.length)}
+function aggiorna(){toast("Aggiorno…");setTimeout(()=>location.reload(),300)}
 let _cf=null;
 function conferma(m,f){_cf=f;apri(`<h2 style="margin-top:0;font-size:18px">${esc(m)}</h2><button class="b w" onclick="chiudi();_cf()">Sì</button><button class="g" style="width:100%;margin-top:8px" onclick="chiudi()">No</button>`,true)}
 
@@ -263,10 +272,10 @@ function copiaLink(){
 function addCibo(){
   const n=norm($("dN").value);if(!n){alert("Scrivi il nome del cibo.");return}
   if(!act){alert("Prima entra in una famiglia.");return}
-  col("dispensa").add({n,s:$("dS").value,q:$("dQ").value.trim()||"—"});
+  const C=col("dispensa");C.add({n,s:$("dS").value,q:$("dQ").value.trim()||"—"}).then(r=>reg("Cibo aggiunto: "+n,()=>C.doc(r.id).delete()));
   $("dN").value=$("dS").value=$("dQ").value="";$("dS").type="text";$("fd").classList.add("hide");
 }
-const togliCibo=id=>{aperto="";col("dispensa").doc(id).delete()};
+function togliCibo(id){aperto="";const x=dispensa.find(d=>d.id===id);if(!x)return;const C=col("dispensa"),{n,s,q}=x;C.doc(id).delete();reg("Cibo tolto: "+n,()=>C.doc(id).set({n,s:s||"",q}))}
 function testoScad(s){
   if(!s)return{t:"Nessuna scadenza",r:false};
   const d=Math.round((new Date(s+"T00:00:00")-new Date(new Date().toDateString()))/864e5);
@@ -285,13 +294,17 @@ function uiDisp(){
 function parseQ(s){const m=/^\s*(\d+(?:[.,]\d+)?)\s*([a-zA-Z]*)/.exec(s||"");if(!m)return null;let v=parseFloat(m[1].replace(",",".")),u=m[2].toLowerCase();if(u==="kg"){v*=1000;u="g"}else if(u==="gr"){u="g"}else if(u==="l"||u==="lt"){v*=1000;u="ml"}return{v,u}}
 const fmtQ=p=>Math.round(p.v*100)/100+(p.u?" "+p.u:"");
 function usa(e){
+  const C=col("dispensa"),inv=[];
   for(const nome of e.i){
     const c=dispensa.find(d=>d.n===nome);if(!c)continue;
     const p=parseQ(c.q);if(!p)continue;
     let q=parseQ(e.q&&e.q[nome]);if(!q||q.u!==p.u)q={v:1,u:p.u};
+    const orig={n:c.n,s:c.s||"",q:c.q};
     p.v-=q.v;
-    if(p.v<=0)col("dispensa").doc(c.id).delete();else col("dispensa").doc(c.id).update({q:fmtQ(p)});
+    if(p.v<=0)C.doc(c.id).delete();else C.doc(c.id).update({q:fmtQ(p)});
+    inv.push(()=>C.doc(c.id).set(orig));
   }
+  return()=>Promise.all(inv.map(f=>f()));
 }
 
 // ---- planner condiviso ----
@@ -316,14 +329,17 @@ function uiHome(){
 }
 function completato(id){
   const e=plan.find(x=>x.id===id);if(!e)return;
-  if(!Object.keys(e.done||{}).some(k=>k.startsWith(lun()+"|")))usa(e);   // gli ingredienti si scalano una volta sola
-  col("planner").doc(id).update(new firebase.firestore.FieldPath("done",dk()),true);
+  const R=col("planner"),fp=new firebase.firestore.FieldPath("done",dk());
+  const rip=!Object.keys(e.done||{}).some(k=>k.startsWith(lun()+"|"))?usa(e):null;   // ingredienti scalati una sola volta
+  R.doc(id).update(fp,true);
+  reg("Pasto completato: "+e.p,()=>{R.doc(id).update(fp,firebase.firestore.FieldValue.delete());return rip?rip():null});
 }
 function cella(k){
   if(!act){alert("Prima entra in una famiglia.");return}
   const[g,p]=k.split("-");
-  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>`<div class="m"><span class="n">${etich(e)}</span><button class="g r" onclick="chiudi();col('planner').doc('${e.id}').delete()">Togli</button></div>`).join("")+`<button class="b w" onclick="scegli('${k}')">➕ Aggiungi un piatto</button>`);
+  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>`<div class="m"><span class="n">${etich(e)}</span><button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button></div>`).join("")+`<button class="b w" onclick="scegli('${k}')">➕ Aggiungi un piatto</button>`);
 }
+function togliPlan(id){const e=plan.find(x=>x.id===id);if(!e)return;const R=col("planner"),d=Object.assign({},e);delete d.id;R.doc(id).delete();reg("Piatto tolto: "+e.p,()=>R.doc(id).set(d))}
 function scegli(k){
   apri(`<h2 style="margin-top:0">Scegli un piatto</h2>`+piatti.map((x,i)=>`<div class="card" onclick="opzioni('${k}',${i})"><b>${esc(x.n)}</b> ${completo(x)?'<span class="ing y">hai tutto</span>':''}<div>${chips(x.i)}</div></div>`).join(""));
 }
@@ -336,9 +352,9 @@ function opzioni(k,i){
 function aggiungiPlan(k,i){
   const pe=$("aPer").value,rip=+$("aRip").value,x=piatti[i],pasto=k.split("-")[1];
   const base={p:x.n,i:x.i,q:x.q||{},per:pe,autore:utente,fisso:rip>0,sett:rip>0?null:lun(),done:{}};
-  const b=db.batch();
-  (rip===2?GG.map((_,g)=>g+"-"+pasto):[k]).forEach(s=>b.set(col("planner").doc(),Object.assign({slot:s},base)));
-  b.commit().then(()=>{chiudi();toast("Aggiunto al planner")}).catch(()=>alert("Non riesco ad aggiungere."));
+  const b=db.batch(),R=col("planner"),refs=[];
+  (rip===2?GG.map((_,g)=>g+"-"+pasto):[k]).forEach(sl=>{const r=R.doc();refs.push(r);b.set(r,Object.assign({slot:sl},base))});
+  b.commit().then(()=>{chiudi();reg("Aggiunto al planner: "+x.n,()=>{const d=db.batch();refs.forEach(r=>d.delete(r));return d.commit()})}).catch(()=>alert("Non riesco ad aggiungere."));
 }
 function uiStor(){
   const w=[...new Set(plan.filter(e=>!e.fisso&&e.sett<lun()&&vis(e)).map(e=>e.sett))].sort().reverse();
@@ -355,8 +371,9 @@ function uiPiatti(){
   $("pSalva").textContent=controId?"Salva e invia controproposta":"Salva piatto";
   $("pChips").innerHTML=dispensa.length?dispensa.map(c=>`<button class="g ${sel.has(c.id)?'on':''}" style="margin:4px 6px 0 0" onclick="tog('${c.id}')">${emoji(c.n)} ${esc(c.n)}</button>`).join(""):'<p class="empty">La dispensa è vuota: scrivi gli ingredienti qui sotto.</p>';
   $("pQty").innerHTML=[...sel].map(([id,q])=>{const c=dispensa.find(x=>x.id===id);return c?`<div class="m"><span class="n">${emoji(c.n)} ${esc(c.n)}<br><small style="font-weight:400;color:var(--soft)">In dispensa: ${esc(c.q)}</small></span><input style="width:130px;margin:0" placeholder="Quantità es. 100 g" value="${esc(q)}" oninput="sel.set('${id}',this.value)"></div>`:""}).join("");
-  $("pList").innerHTML=piatti.map((x,i)=>`<div class="card"><b>${esc(x.n)}</b><div>${chips(x.i)}</div><button class="b" style="margin-top:10px" onclick="invia(${i})">Proponi alla famiglia</button> <button class="g r" onclick="piatti.splice(${i},1);salva();uiPiatti()">Elimina</button></div>`).join("");
+  $("pList").innerHTML=piatti.map((x,i)=>`<div class="card"><b>${esc(x.n)}</b><div>${chips(x.i)}</div><button class="b" style="margin-top:10px" onclick="invia(${i})">Proponi alla famiglia</button> <button class="g r" onclick="togliPiatto(${i})">Elimina</button></div>`).join("");
 }
+function togliPiatto(i){const x=piatti.splice(i,1)[0];salva();uiPiatti();reg("Piatto eliminato: "+x.n,()=>{piatti.splice(Math.min(i,piatti.length),0,x);salva();uiPiatti()})}
 function tog(id){sel.has(id)?sel.delete(id):sel.set(id,"");uiPiatti()}
 function salvaPiatto(){
   const n=$("pN").value.trim();
@@ -368,6 +385,7 @@ function salvaPiatto(){
   if(!n||!ing.length){alert("Scrivi il nome e scegli almeno un ingrediente.");return}
   const x={n,i:[...new Set(ing)],q};piatti.push(x);sel.clear();$("pN").value=$("pX").value="";salva();
   if(controId){const id=controId;controId="";inviaContro(id,x);vai("famiglia");return}
+  reg("Piatto salvato: "+n,()=>{const j=piatti.indexOf(x);if(j>=0)piatti.splice(j,1);salva();uiPiatti()});
   uiPiatti();
 }
 
@@ -381,7 +399,7 @@ function invia(i){
 }
 function spedisci(i){
   const x=piatti[i],pe=$("iPer").value;chiudi();
-  col("proposte").add({autore:utente,n:x.n,i:x.i,q:x.q||{},ts:Date.now(),risposte:{},per:pe}).then(()=>toast("Proposta inviata!")).catch(()=>alert("Invio non riuscito."));
+  const R=col("proposte");R.add({autore:utente,n:x.n,i:x.i,q:x.q||{},ts:Date.now(),risposte:{},per:pe}).then(r=>reg("Proposta inviata: "+x.n,()=>R.doc(r.id).delete())).catch(()=>alert("Invio non riuscito."));
 }
 function cardProposta(p,par){
   const r=p.risposte||{},mia=r[utente];
@@ -392,17 +410,26 @@ function cardProposta(p,par){
   const priv=per(p)==="tutti"?"":` · solo per ${per(p)===utente?"te":esc(per(p))}`;
   return `<div class="card"><div class="when">${par?"↪ "+esc(p.autore)+" contropropone":esc(p.autore)+" propone"}${priv}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}<h3 style="margin:2px 0 6px;font-size:19px">${esc(p.n)}</h3><div>${chips(p.i)}</div><div style="margin-top:8px;font-size:14px">${stato}</div>${bt}</div>`;
 }
-const rispondi=(id,v)=>col("proposte").doc(id).update(new firebase.firestore.FieldPath("risposte",utente),{v});
+function rispondiRaw(id,v){
+  const R=col("proposte"),fp=new firebase.firestore.FieldPath("risposte",utente),pr=proposte.find(p=>p.id===id),old=pr&&pr.risposte&&pr.risposte[utente];
+  R.doc(id).update(fp,{v});
+  return()=>R.doc(id).update(fp,old||firebase.firestore.FieldValue.delete());
+}
+function rispondi(id,v){reg(v==="si"?"Hai accettato":"Hai rifiutato",rispondiRaw(id,v))}
 function inviaContro(id,x){
-  const o=proposte.find(p=>p.id===id)||{},radice=o.rif||id;
-  rispondi(id,"contro");
-  col("proposte").add({autore:utente,n:x.n,i:x.i,q:x.q||{},ts:Date.now(),risposte:{},rif:radice,per:per(o)==="tutti"?"tutti":(o.autore||"tutti")}).then(()=>toast("Controproposta inviata!"));
+  const o=proposte.find(p=>p.id===id)||{},radice=o.rif||id,R=col("proposte");
+  const inv=rispondiRaw(id,"contro");
+  R.add({autore:utente,n:x.n,i:x.i,q:x.q||{},ts:Date.now(),risposte:{},rif:radice,per:per(o)==="tutti"?"tutti":(o.autore||"tutti")}).then(r=>reg("Controproposta inviata",()=>{R.doc(r.id).delete();return inv()}));
 }
 function contro(id){
   apri(`<h2 style="margin-top:0">Cosa preferisci?</h2><button class="b w" style="margin:0 0 6px" onclick="chiudi();controId='${id}';vai('piatti')">➕ Componi un nuovo piatto</button><p class="sub" style="margin-top:14px">Oppure scegli uno dei tuoi piatti:</p>`+
     piatti.map((x,i)=>`<div class="card" onclick="chiudi();inviaContro('${id}',piatti[${i}])"><b>${esc(x.n)}</b><div>${chips(x.i)}</div></div>`).join(""));
 }
-function elimina(id){conferma("Eliminare la proposta?",()=>{proposte.filter(c=>c.rif===id).forEach(c=>col("proposte").doc(c.id).delete());col("proposte").doc(id).delete()})}
+function elimina(id){conferma("Eliminare la proposta?",()=>{
+  const R=col("proposte"),tutte=proposte.filter(c=>c.id===id||c.rif===id).map(c=>{const d=Object.assign({},c);delete d.id;return{id:c.id,d}});
+  tutte.forEach(t=>R.doc(t.id).delete());
+  reg("Proposta eliminata",()=>Promise.all(tutte.map(t=>R.doc(t.id).set(t.d))));
+})}
 
 // ---- pagina famiglie ----
 function uiFam(){
@@ -421,28 +448,30 @@ function uiFam(){
 function draw(){
   $("av").textContent=utente?utente[0].toUpperCase():"?";
   $("tit").textContent=pag==="home"?(nomeFam||TIT.home):TIT[pag];
-  uiHome();uiDisp();uiFam();uiPiatti();uiStor();
+  uiHome();uiDisp();uiFam();uiPiatti();uiStor();uiUndo();
 }
-function vai(p){
+function ensure(){if(!history.state||history.state.s!==1)history.pushState({s:1},"")}
+function mostra(p){
   pag=p;
   for(const n of Object.keys(TIT)){$("p-"+n).classList.toggle("hide",n!==p);if($("t-"+n))$("t-"+n).classList.toggle("on",n===p)}
   $("home").classList.toggle("hide",p==="home");
-  draw();document.querySelector("main").scrollTop=0;
+  draw();scrollTo(0,0);
 }
+function vai(p){
+  if(p!==pag){nav.push(pag);if(nav.length>15)nav.shift()}
+  if(p==="home")nav=[];
+  ensure();mostra(p);
+}
+if(!(history.state&&history.state.s===1)){history.replaceState({s:0},"");history.pushState({s:1},"")}
+addEventListener("popstate",()=>{
+  if(!$("mod").classList.contains("hide")){chiudi();history.pushState({s:1},"");return}
+  if(nav.length){mostra(nav.pop());history.pushState({s:1},"");return}
+  toast("Premi ancora indietro per uscire");
+});
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;draw()});
 addEventListener("appinstalled",()=>{deferred=null;draw()});
 function installa(){if(deferred){deferred.prompt();deferred=null;draw()}}
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
-// evita che scorrendo verso l'alto la pagina si ricarichi
-(function(){let y0=0;
-  document.addEventListener("touchstart",e=>{y0=e.touches[0].clientY},{passive:true});
-  document.addEventListener("touchmove",e=>{
-    const dy=e.touches[0].clientY-y0;let el=e.target;
-    while(el&&el!==document.body){if(el.scrollHeight>el.clientHeight&&["auto","scroll"].includes(getComputedStyle(el).overflowY))break;el=el.parentElement}
-    if(!el||el===document.body){e.preventDefault();return}
-    if(el.scrollTop<=0&&dy>0)e.preventDefault();
-  },{passive:false});
-})();
 carica();draw();if(!utente)chiediNome();else avvia();
 </script>
 </body>
