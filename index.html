@@ -27,7 +27,9 @@ nav button{position:relative;flex:1;padding:8px 4px;border:0;background:none;col
 nav button span{display:flex;align-items:center;justify-content:center;height:30px;font-size:24px;filter:grayscale(1);opacity:.55;transition:filter .35s,opacity .35s,transform .3s}
 nav button.on{color:var(--green);box-shadow:inset 0 3px 0 var(--saffron)}
 nav button.on span{filter:none;opacity:1;transform:scale(1.12)}
-.bd{position:absolute;top:3px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:#D93025;color:#fff;font-size:11px;line-height:18px;text-align:center;font-weight:700;padding:0 4px}
+.bd{position:absolute;top:6px;left:calc(50% + 8px);width:12px;height:12px;border-radius:50%;background:#B8C2B2;border:2px solid var(--card);transition:background .4s}
+.bd.b1{background:#2D9CDB;animation:pul 1.8s ease-in-out infinite}.bd.b2{background:#F2B705;animation:pul 1.8s ease-in-out infinite}.bd.b3{background:#D93025;animation:pul 1.8s ease-in-out infinite}
+@keyframes pul{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 input,select{font:inherit;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);min-width:0;width:100%;margin-top:8px;transition:border-color .2s,background .2s}
 input::placeholder{color:#9AA79A}
 .b{font:inherit;font-weight:700;padding:11px 16px;border:0;border-radius:10px;background:var(--green);color:#fff}
@@ -177,7 +179,7 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
 <nav>
   <button id="t-famiglia" onclick="vai('famiglia')"><span><svg viewBox="0 0 32 32" width="28" height="28"><circle cx="9.5" cy="9" r="4" fill="#F2994A"/><path d="M3 27c0-6 2.8-10 6.5-10s6.5 4 6.5 10z" fill="#E76F51"/><circle cx="22.5" cy="9" r="4" fill="#4C9BE8"/><path d="M16 27c0-6 2.8-10 6.5-10S29 21 29 27z" fill="#2F7DD1"/><circle cx="16" cy="16.5" r="3.4" fill="#F2C94C"/><path d="M10.5 29c0-4.5 2.4-7.4 5.5-7.4s5.5 2.9 5.5 7.4z" fill="#27AE60"/><path d="M16 3.4c-.9-1.5-3-.7-2.4.9.4 1 2.4 2.1 2.4 2.1s2-1.1 2.4-2.1c.6-1.6-1.5-2.4-2.4-.9z" fill="#EB5757"/></svg></span>Famiglia</button>
   <button id="t-piatti" onclick="vai('piatti')"><span><svg viewBox="0 0 32 32" width="28" height="28"><g class="vap" fill="none" stroke="#E9A23B" stroke-width="2" stroke-linecap="round"><path d="M10 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M16 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M22 10c-2.2-2 2.2-3.4 0-6.4"/></g><path d="M3 15.5h26a13 11.5 0 0 1-26 0z" fill="#2F6B3A"/><ellipse cx="16" cy="15.5" rx="13" ry="2.4" fill="#F2B705"/><rect x="9.5" y="26.2" width="13" height="2.6" rx="1.3" fill="#1D2B1A"/></svg></span>Piatti</button>
-  <button id="t-proposte" onclick="vai('proposte')"><span><svg viewBox="0 0 32 32" width="28" height="28"><rect x="3" y="7" width="26" height="19" rx="4" fill="#4C9BE8"/><path d="M4 10l12 9 12-9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="8" r="4.5" fill="#F2B705"/></svg></span>Proposte<b class="bd hide" id="bd"></b></button>
+  <button id="t-proposte" onclick="vai('proposte')"><span><svg viewBox="0 0 32 32" width="28" height="28"><rect x="3" y="7" width="26" height="19" rx="4" fill="#4C9BE8"/><path d="M4 10l12 9 12-9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="8" r="4.5" fill="#F2B705"/></svg></span>Proposte<b class="bd" id="bd"></b></button>
   <button id="t-storico" onclick="vai('storico')"><span id="ic-storico">📅</span>Storico</button>
 </nav>
 <div class="ov hide" id="mod"><div class="sheet" id="sheet"></div></div>
@@ -199,6 +201,10 @@ let db=null; if(online){firebase.initializeApp(FIREBASE_CONFIG);db=firebase.fire
 const GG=["Lun","Mar","Mer","Gio","Ven","Sab","Dom"],PP=["colazione","pranzo","cena"];
 const TIT={home:"Cosa mangio",famiglia:"Famiglie",piatti:"Piatti",proposte:"Proposte",storico:"Storico"};
 const PI={colazione:"☀️",pranzo:"🍝",cena:"🌙"};
+const GGF=["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"];
+const quando=p=>[p.g!=null?GGF[p.g]:"",p.pa?"a "+p.pa:""].filter(Boolean).join(" ");
+const selGP=(g,pa,pre)=>`<label class="l">Giorno<select id="${pre}G"><option value="">Nessun giorno</option>${GGF.map((x,i)=>`<option value="${i}" ${g===i?"selected":""}>${x}</option>`).join("")}</select></label><label class="l">Pasto<select id="${pre}P"><option value="">Nessun pasto</option>${PP.map(x=>`<option value="${x}" ${pa===x?"selected":""}>${PI[x]} ${x}</option>`).join("")}</select></label>`;
+const leggiGP=pre=>{const g=$(pre+"G").value,p=$(pre+"P").value;return{g:g===""?null:+g,pa:p||null}};
 const BOWL='<svg viewBox="0 0 32 32" width="120" height="120"><g class="vap" fill="none" stroke="#E9A23B" stroke-width="1.6" stroke-linecap="round"><path d="M10 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M16 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M22 10c-2.2-2 2.2-3.4 0-6.4"/></g><path d="M3 15.5h26a13 11.5 0 0 1-26 0z" fill="#7FC48A"/><ellipse cx="16" cy="15.5" rx="13" ry="2.4" fill="#F2B705"/><rect x="9.5" y="26.2" width="13" height="2.6" rx="1.3" fill="#F5F8EE"/></svg>';
 // emoji per tipo di cibo (si cerca nel nome)
 const EMO={};
@@ -212,7 +218,7 @@ const CAT={};
 // ---- stato ----
 let utente="",fams=[],act="",piatti=[];                                // salvati sul telefono
 let membri=[],nomeFam="",custom=[],legacy=[],plan=[],proposte=[];       // dalla famiglia attiva
-let unsubs=[],pag="home",controId="",deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editIdx=-1,pot=[],catSel="Tutti",tmpX=null,primoP=true,visti={},_nk="",_tt=null,_cf=null;
+let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editIdx=-1,pot=[],catSel="Tutti",tmpX=null,primoP=true,visti={},_nk="",_tt=null,_cf=null;
 
 function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,fams,act,piatti}))}catch(e){}}
 function carica(){
@@ -276,6 +282,7 @@ function attiva(){
   unsubs.forEach(f=>f());unsubs=[];primoP=true;visti={};membri=[];custom=[];legacy=[];plan=[];proposte=[];nomeFam="";
   if(!online||!act){draw();return}
   if(!fams.find(x=>x.c===act)&&fams.length){act=fams[0].c;salva()}
+  if(getSeen()===null)setSeen();
   unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
   const sub=(n,fn,on)=>unsubs.push(col(n).onSnapshot(sn=>{if(on)on(sn);fn(sn.docs.map(d=>Object.assign({id:d.id},d.data())));draw()}));
   sub("ingredienti",a=>{custom=a});
@@ -351,7 +358,7 @@ function controllaProposte(sn){
     const p=Object.assign({id:ch.doc.id},ch.doc.data());
     if(pronto&&!ch.doc.metadata.hasPendingWrites){
       if(ch.type==="added"){
-        if(p.autore!==utente&&toMe(p))notifica(p.rif?"💬 Controproposta":"🍽️ Nuova proposta",`${p.autore} ${p.rif?"contropropone":"propone"}: ${p.n}`);
+        if(p.autore!==utente&&toMe(p))notifica(p.rif?"💬 Controproposta":"🍽️ Nuova proposta",`${p.autore} ${p.rif?"contropropone":"propone"}: ${p.n}${quando(p)?" ("+quando(p)+")":""}`);
       }else if(ch.type==="modified"&&p.autore===utente){
         const old=visti[p.id]||{},nw=p.risposte||{};
         for(const m in nw){const a=nw[m],b=old[m];
@@ -411,7 +418,7 @@ function fondi(){
   const ing=[...pot];
   anima(ing,n,()=>{
     const x={n,i:ing};piatti.push(x);pot=[];$("pN").value="";salva();
-    if(controId){const id=controId;controId="";inviaContro(id,x);vai("proposte");return}
+    if(controId){const id=controId;controId="";inviaContro(id,x,controGP);controGP=null;vai("proposte");return}
     uiPiatti();reg("Piatto creato: "+n,()=>{const j=piatti.indexOf(x);if(j>=0)piatti.splice(j,1);salva();uiPiatti()});
   });
 }
@@ -499,7 +506,7 @@ function inserisci(k,x,pers,rip,fuori){
 }
 function piano(pid){
   const p=proposte.find(x=>x.id===pid);if(!p)return;
-  apri(`<h2 style="margin-top:0">📅 ${esc(p.n)}</h2><label class="l">Giorno<select id="gG">${GG.map((g,i)=>`<option value="${i}">${g}</option>`).join("")}</select></label><label class="l">Pasto<select id="gP">${PP.map(x=>`<option value="${x}">${PI[x]} ${x}</option>`).join("")}</select></label>${persone(false,true)}${selQuando}<button class="b w" onclick="aggiungiDaProposta('${pid}')">Aggiungi al planner</button>`);
+  apri(`<h2 style="margin-top:0">📅 ${esc(p.n)}</h2><label class="l">Giorno<select id="gG">${GGF.map((g,i)=>`<option value="${i}" ${p.g===i?"selected":""}>${g}</option>`).join("")}</select></label><label class="l">Pasto<select id="gP">${PP.map(x=>`<option value="${x}" ${p.pa===x?"selected":""}>${PI[x]} ${x}</option>`).join("")}</select></label>${persone(false,true)}${selQuando}<button class="b w" onclick="aggiungiDaProposta('${pid}')">Aggiungi al planner</button>`);
 }
 function aggiungiDaProposta(pid){
   const p=proposte.find(x=>x.id===pid),pers=leggiPers();if(!p||!pers)return;
@@ -523,28 +530,37 @@ function uiNavIcons(){
 // ---- proposte ----
 function invia(i){
   if(!act){alert("Prima entra in una famiglia.");return}
-  apri(`<h2 style="margin-top:0">Proponi "${esc(piatti[i].n)}"</h2>${persone(true,true)}<button class="b w" onclick="spedisci(${i})">Invia proposta</button>`);
+  apri(`<h2 style="margin-top:0">Proponi "${esc(piatti[i].n)}"</h2>${persone(true,true)}${selGP(null,null,"i")}<button class="b w" onclick="spedisci(${i})">Invia proposta</button>`);
 }
 function spedisci(i){
   const l=leggiPers();if(!l)return;
-  const x=piatti[i],R=col("proposte");chiudi();
-  R.add({autore:utente,n:x.n,i:x.i,ts:Date.now(),risposte:{},per:perVal(l,true)}).then(r=>reg("Proposta inviata: "+x.n,()=>R.doc(r.id).delete())).catch(()=>alert("Invio non riuscito."));
+  const x=piatti[i],R=col("proposte"),gp=leggiGP("i");chiudi();
+  R.add({autore:utente,n:x.n,i:x.i,ts:Date.now(),risposte:{},per:perVal(l,true),g:gp.g,pa:gp.pa}).then(r=>reg("Proposta inviata: "+x.n,()=>R.doc(r.id).delete())).catch(()=>alert("Invio non riuscito."));
 }
 function rispondiRaw(id,v){
   const R=col("proposte"),fp=new firebase.firestore.FieldPath("risposte",utente),pr=proposte.find(p=>p.id===id),old=pr&&pr.risposte&&pr.risposte[utente];
-  R.doc(id).update(fp,{v});
+  R.doc(id).update(fp,{v,t:Date.now()});
   return()=>R.doc(id).update(fp,old||firebase.firestore.FieldValue.delete());
 }
 function rispondi(id,v){reg(v==="si"?"Hai accettato":"Hai rifiutato",rispondiRaw(id,v))}
-function inviaContro(id,x){
+function inviaContro(id,x,gp){
   const o=proposte.find(p=>p.id===id)||{},radice=o.rif||id,R=col("proposte");
   const inv=rispondiRaw(id,"contro");
-  R.add({autore:utente,n:x.n,i:x.i,ts:Date.now(),risposte:{},rif:radice,per:arr(o)?[o.autore]:"tutti"}).then(r=>reg("Controproposta inviata",()=>{R.doc(r.id).delete();return inv()}));
+  R.add({autore:utente,n:x.n,i:x.i,ts:Date.now(),risposte:{},rif:radice,per:arr(o)?[o.autore]:"tutti",g:gp?gp.g:null,pa:gp?gp.pa:null}).then(r=>reg("Controproposta inviata",()=>{R.doc(r.id).delete();return inv()}));
 }
 function contro(id){
-  apri(`<h2 style="margin-top:0">Cosa preferisci?</h2><button class="b w" style="margin:0 0 6px" onclick="chiudi();controId='${id}';vai('piatti')">➕ Crea un nuovo piatto</button><p class="sub" style="margin-top:14px">Oppure scegli uno dei tuoi piatti:</p>`+
-    ordP().map(([x,i])=>`<div class="card" onclick="chiudi();inviaContro('${id}',piatti[${i}])"><b>${x.pref?"⭐ ":""}${esc(x.n)}</b><div>${chips(x.i)}</div></div>`).join(""));
+  const o=proposte.find(p=>p.id===id)||{};
+  apri(`<h2 style="margin-top:0">Cosa preferisci?</h2>${selGP(o.g==null?null:o.g,o.pa||null,"c")}<button class="b w" onclick="controStesso('${id}')">🔁 Stesso piatto, cambia il giorno</button><button class="g" style="width:100%;margin-top:8px" onclick="controNuovo('${id}')">➕ Crea un nuovo piatto</button><p class="sub" style="margin-top:16px">Oppure scegli uno dei tuoi piatti:</p>`+
+    ordP().map(([x,i])=>`<div class="card" onclick="controPiatto('${id}',${i})"><b>${x.pref?"⭐ ":""}${esc(x.n)}</b><div>${chips(x.i)}</div></div>`).join(""));
 }
+function controStesso(id){
+  const o=proposte.find(p=>p.id===id);if(!o)return;
+  const gp=leggiGP("c");
+  if(gp.g===(o.g==null?null:o.g)&&gp.pa===(o.pa||null)){alert("Cambia il giorno o il pasto, oppure scegli un altro piatto.");return}
+  chiudi();inviaContro(id,{n:o.n,i:o.i},gp);
+}
+function controPiatto(id,i){const gp=leggiGP("c");chiudi();inviaContro(id,piatti[i],gp)}
+function controNuovo(id){controGP=leggiGP("c");chiudi();controId=id;vai("piatti")}
 function elimina(id){conferma("Eliminare la proposta?",()=>{
   const R=col("proposte"),tutte=proposte.filter(c=>c.id===id||c.rif===id).map(c=>{const d=Object.assign({},c);delete d.id;return{id:c.id,d}});
   tutte.forEach(t=>R.doc(t.id).delete());
@@ -556,7 +572,7 @@ function cardP(p,par){
   const on=v=>mia&&mia.v===v?" on":"";
   const acc=(p.autore===utente&&rs.some(m=>r[m]&&r[m].v==="si"))||(mia&&mia.v==="si");
   const bt=rs.includes(utente)&&p.autore!==utente?`<div class="btns"><button class="bt si${on("si")}" onclick="rispondi('${p.id}','si')">✅<br>Accetto</button><button class="bt no${on("no")}" onclick="rispondi('${p.id}','no')">❌<br>Rifiuto</button><button class="bt co${on("contro")}" onclick="contro('${p.id}')">💬<br>Controproposta</button></div>`:"";
-  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · riservata":""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3><div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">📅 Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
+  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · riservata":""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">📅 ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">📅 Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
 }
 function uiProp(){
   if(!act){$("propList").innerHTML='<p class="empty">Entra in una famiglia dalla pagina Famiglia.</p>';return}
@@ -569,7 +585,22 @@ function uiProp(){
     `<h2>📤 Le mie proposte</h2>`+(B.length?B.map(th).join(""):'<p class="empty">Nessuna proposta in corso. Creane una dalla scheda Piatti.</p>')+
     (C.length?`<details class="card"><summary>🗂️ Altre proposte (${C.length})</summary>${C.map(th).join("")}</details>`:"");
 }
-function uiBadge(){const n=pendList().length;$("bd").textContent=n;$("bd").classList.toggle("hide",!n)}
+function getSeen(){try{const v=localStorage.getItem("pv_"+act);return v===null?null:+v}catch(e){return 0}}
+function setSeen(){try{localStorage.setItem("pv_"+act,Date.now())}catch(e){}}
+// proposte "da leggere": nuove per me, o con risposte arrivate dopo l'ultima visita alla scheda
+function nonLetti(){
+  const s=getSeen()||0,t=new Set();
+  proposte.filter(vis).forEach(p=>{
+    const nuovo=p.autore!==utente?(toMe(p)&&p.ts>s):Object.entries(p.risposte||{}).some(([m,r])=>m!==utente&&r.t>s);
+    if(nuovo)t.add(p.rif||p.id);
+  });
+  return t.size;
+}
+function uiBadge(){
+  if(pag==="proposte")setSeen();
+  const n=pag==="proposte"?0:nonLetti();
+  $("bd").className="bd"+(n?" b"+Math.min(n,3):"");
+}
 
 // ---- navigazione ----
 function draw(){
@@ -579,6 +610,7 @@ function draw(){
 }
 function ensure(){if(!history.state||history.state.s!==1)history.pushState({s:1},"")}
 function mostra(p){
+  if(p!=="piatti"){$("iQ").value="";catSel="Tutti"}   // ricerca azzerata: rientrando si vedono tutti gli ingredienti
   pag=p;
   for(const n of Object.keys(TIT)){$("p-"+n).classList.toggle("hide",n!==p);if($("t-"+n))$("t-"+n).classList.toggle("on",n===p)}
   $("home").classList.toggle("hide",p==="home");

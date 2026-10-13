@@ -1,4 +1,4 @@
-const C="cosa-mangio-v7";
+const C="cosa-mangio-v8";
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(["./","index.html"])).catch(()=>{}))});
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",e=>{
