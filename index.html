@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cosa mangio</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#2F6B3A">
+<meta name="theme-color" content="#2C7BC1">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
-:root{--bg:#F5F8EE;--ink:#1D2B1A;--soft:#5E6D58;--card:#FFFFFF;--line:#D9E2CC;--green:#2F6B3A;--saffron:#F2B705;--red:#B8402F;--ok:#E3F1DA;--no:#FBE7E2;--wbg:#FFF1BF;--wink:#7A5B00;--fbg:#E6EEFB;--fink:#2E4A78}
-@media (prefers-color-scheme:dark){:root{--bg:#141C12;--ink:#EAF1E1;--soft:#9AAB92;--card:#1E2A1B;--line:#33442E;--green:#7FC48A;--red:#EE8A78;--ok:#25391F;--no:#3E2420;--wbg:#3F3410;--wink:#F2C94C;--fbg:#22304A;--fink:#9DB9E8}}
+:root{--bg:#EEF6FD;--ink:#14263A;--soft:#5B6F84;--card:#FFFFFF;--line:#D3E2F0;--main:#2C7BC1;--saffron:#F2B705;--red:#B8402F;--ok:#DDEEFB;--no:#FBE7E2;--wbg:#FFF1BF;--wink:#7A5B00;--fbg:#EDE7F9;--fink:#5A3E99}
+@media (prefers-color-scheme:dark){:root{--bg:#0F1B28;--ink:#E6EFF8;--soft:#93A8BD;--card:#182838;--line:#2B4258;--main:#6FB6EE;--red:#EE8A78;--ok:#1B3A55;--no:#3E2420;--wbg:#3F3410;--wink:#F2C94C;--fbg:#2F2745;--fink:#C3B1F0}.b,.av{color:#0B1620}}
 *{box-sizing:border-box}
 html,body{margin:0;overscroll-behavior-y:contain}
 body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif;font-size:16px;line-height:1.4;min-height:100%}
 header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px}
 header h1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Georgia,serif;font-size:22px;margin:0}
 .ib{padding:6px 11px;font-size:18px;line-height:1.2}
-.av{width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;font:700 20px Georgia,serif;display:flex;align-items:center;justify-content:center;flex:none;border:0}
+.av{width:42px;height:42px;border-radius:50%;background:var(--main);color:#fff;font:700 20px Georgia,serif;display:flex;align-items:center;justify-content:center;flex:none;border:0}
 .av.s{width:30px;height:30px;font-size:15px}
 main{padding:4px 16px calc(100px + env(safe-area-inset-bottom,0px))}
 h2{font-family:Georgia,serif;font-size:19px;margin:22px 0 8px}
@@ -25,17 +25,17 @@ p.sub{margin:0 0 12px;color:var(--soft);font-size:14px}
 nav{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;border-top:1px solid var(--line);background:var(--card);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav button{position:relative;flex:1;padding:8px 4px;border:0;background:none;color:var(--soft);font:inherit;font-size:12px;font-weight:700}
 nav button span{display:flex;align-items:center;justify-content:center;height:30px;font-size:24px;filter:grayscale(1);opacity:.55;transition:filter .35s,opacity .35s,transform .3s}
-nav button.on{color:var(--green);box-shadow:inset 0 3px 0 var(--saffron)}
+nav button.on{color:var(--main);box-shadow:inset 0 3px 0 var(--saffron)}
 nav button.on span{filter:none;opacity:1;transform:scale(1.12)}
-.bd{position:absolute;top:6px;left:calc(50% + 8px);width:12px;height:12px;border-radius:50%;background:#B8C2B2;border:2px solid var(--card);transition:background .4s}
+.bd{position:absolute;top:6px;left:calc(50% + 8px);width:12px;height:12px;border-radius:50%;background:#B8C4D0;border:2px solid var(--card);transition:background .4s}
 .bd.b1{background:#2D9CDB;animation:pul 1.8s ease-in-out infinite}.bd.b2{background:#F2B705;animation:pul 1.8s ease-in-out infinite}.bd.b3{background:#D93025;animation:pul 1.8s ease-in-out infinite}
 @keyframes pul{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 input,select{font:inherit;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);min-width:0;width:100%;margin-top:8px;transition:border-color .2s,background .2s}
-input::placeholder{color:#9AA79A}
-.b{font:inherit;font-weight:700;padding:11px 16px;border:0;border-radius:10px;background:var(--green);color:#fff}
+input::placeholder{color:#9AAABB}
+.b{font:inherit;font-weight:700;padding:11px 16px;border:0;border-radius:10px;background:var(--main);color:#fff}
 .b.w{width:100%;margin-top:12px}
 .g{font:inherit;padding:8px 12px;border:1.5px solid var(--line);border-radius:20px;background:var(--card);color:var(--ink)}
-.g.on{background:var(--saffron);border-color:var(--saffron);color:#1D2B1A;font-weight:700}
+.g.on{background:var(--saffron);border-color:var(--saffron);color:#14263A;font-weight:700}
 .g.r{color:var(--red)}
 .b,.g,.chip,.tile{transition:transform .12s,background .2s,color .2s,opacity .2s,box-shadow .2s}
 .b:active,.g:active,.tile:active{transform:scale(.95)}
@@ -43,18 +43,18 @@ input::placeholder{color:#9AA79A}
 .next{border:2.5px solid var(--saffron)}
 .next h3{font-family:Georgia,serif;font-size:22px;margin:2px 0 8px}
 .when{font-size:14px;color:var(--soft);font-weight:700}
-.ing{display:inline-block;padding:4px 10px;margin:3px 4px 0 0;border-radius:8px;font-size:14px;font-weight:700;background:var(--ok);color:var(--green)}
+.ing{display:inline-block;padding:4px 10px;margin:3px 4px 0 0;border-radius:8px;font-size:14px;font-weight:700;background:var(--ok);color:var(--main)}
 .empty{color:var(--soft);padding:10px 0}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;margin:4px 6px 0 0;border-radius:18px;background:var(--ok);font-weight:700;font-size:15px}
 .chip b{color:var(--red);cursor:pointer;padding:0 2px}
 table{width:calc(100% + 10px);margin:0 -5px;border-collapse:separate;border-spacing:5px;table-layout:fixed;font-size:12px}
 th{font-weight:700;color:var(--soft);font-size:12px;padding:2px 0;line-height:1.2}
 th.dg{color:var(--ink);font-size:13px}
-th.oggi{color:#1D2B1A;background:var(--saffron);border-radius:10px}
-td{background:var(--card);height:58px;border-radius:12px;padding:4px;vertical-align:middle;text-align:center;word-wrap:break-word;box-shadow:0 1px 4px rgba(40,60,30,.12);transition:transform .12s,background .15s}
+th.oggi{color:#14263A;background:var(--saffron);border-radius:10px}
+td{background:var(--card);height:58px;border-radius:12px;padding:4px;vertical-align:middle;text-align:center;word-wrap:break-word;box-shadow:0 1px 4px rgba(30,60,100,.12);transition:transform .12s,background .15s}
 td:active{transform:scale(.96)}
 td.has{background:var(--ok)}
-td.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(40,60,30,.12)}
+td.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(30,60,100,.12)}
 td div{margin:2px 0;padding:3px 5px;border-radius:8px;font-weight:700;line-height:1.2}
 td div.sf{background:var(--fbg);color:var(--fink)}
 td .d{text-decoration:line-through;opacity:.5}
@@ -71,9 +71,9 @@ td .d{text-decoration:line-through;opacity:.5}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin-top:8px}
 .tile{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:8px 2px;text-align:center;font:inherit;font-size:12px;font-weight:700;color:var(--ink);word-break:break-word}
 .tile .e{display:block;font-size:28px;line-height:1.2}
-.tile.on{background:var(--saffron);border-color:var(--saffron);color:#1D2B1A}
+.tile.on{background:var(--saffron);border-color:var(--saffron);color:#14263A}
 /* proposte */
-.pc{background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:18px;margin-top:14px;box-shadow:0 2px 10px rgba(40,60,30,.10)}
+.pc{background:var(--card);border:1.5px solid var(--line);border-radius:20px;padding:18px;margin-top:14px;box-shadow:0 2px 10px rgba(30,60,100,.10)}
 .pc h3{font-family:Georgia,serif;font-size:23px;margin:10px 0 6px}
 .ph{display:flex;gap:10px;align-items:center}
 .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
@@ -81,9 +81,9 @@ td .d{text-decoration:line-through;opacity:.5}
 .btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
 .bt{font:inherit;font-weight:700;font-size:13px;padding:14px 4px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);transition:transform .12s,background .2s}
 .bt:active{transform:scale(.95)}
-.bt.si.on{background:var(--ok);border-color:var(--green)}.bt.no.on{background:var(--no);border-color:var(--red)}.bt.co.on{background:var(--fbg);border-color:#4C9BE8}
+.bt.si.on{background:var(--ok);border-color:var(--main)}.bt.no.on{background:var(--no);border-color:var(--red)}.bt.co.on{background:var(--fbg);border-color:#8E6FD8}
 /* finestre, leve, avvisi */
-.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#1D2B1A;color:#fff;padding:10px 18px;border-radius:22px;font-size:15px;z-index:20;max-width:90%;text-align:center;display:none;animation:tin .25s ease}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#14263A;color:#fff;padding:10px 18px;border-radius:22px;font-size:15px;z-index:20;max-width:90%;text-align:center;display:none;animation:tin .25s ease}
 .toast b{margin-left:12px;color:var(--saffron);cursor:pointer}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:9;overscroll-behavior:contain;animation:fade .2s ease}
 .sheet{background:var(--bg);width:100%;max-width:520px;max-height:80%;overflow-y:auto;overscroll-behavior:contain;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));animation:up .32s cubic-bezier(.2,.8,.2,1)}
@@ -94,7 +94,7 @@ label.sw{display:flex;align-items:center;justify-content:space-between;padding:1
 label.sw input{display:none}
 label.sw i{width:50px;height:30px;border-radius:15px;background:var(--line);position:relative;transition:background .25s;flex:none}
 label.sw i::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .25s}
-label.sw input:checked+i{background:var(--green)}
+label.sw input:checked+i{background:var(--main)}
 label.sw input:checked+i::after{transform:translateX(20px)}
 summary{font-weight:700;cursor:pointer}
 .hide{display:none!important}
@@ -104,14 +104,14 @@ nav button.on .vap path{animation:vap 2.2s ease-in-out infinite}
 nav button.on .vap path:nth-child(2){animation-delay:.35s}
 nav button.on .vap path:nth-child(3){animation-delay:.7s}
 /* animazione di fusione */
-.fu{position:fixed;inset:0;z-index:30;background:radial-gradient(circle at center,#2b3d27,#10170f 75%);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:fade .25s ease}
+.fu{position:fixed;inset:0;z-index:30;background:radial-gradient(circle at center,#1f3a55,#0b1520 75%);display:flex;align-items:center;justify-content:center;overflow:hidden;animation:fade .25s ease}
 .fu .ig{position:absolute;left:50%;top:50%;margin:-24px 0 0 -24px;font-size:46px;opacity:0;animation:conv 1.7s cubic-bezier(.6,0,.4,1) forwards;animation-delay:var(--d)}
 .fu .fl{position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:#F2B705;opacity:0;animation:flash .8s 1.6s ease-out forwards}
 .fu .sp{position:absolute;left:50%;top:50%;margin:-10px 0 0 -10px;font-size:20px;opacity:0;animation:spark 1.1s 2s ease-out forwards}
 .fu .res{position:relative;text-align:center;color:#fff;opacity:0;animation:pop .7s 2s cubic-bezier(.2,1.4,.4,1) forwards}
 .fu .rn{font-family:Georgia,serif;font-size:28px;font-weight:700;margin-top:6px;padding:0 20px}
 .fu .rs{color:#F2B705;font-weight:700;margin-top:4px}
-.fu .skip{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom,0px));color:#9AAB92;font-size:13px}
+.fu .skip{position:absolute;bottom:calc(30px + env(safe-area-inset-bottom,0px));color:#93A8BD;font-size:13px}
 .fu .res .vap path{animation:vap 1.6s ease-in-out infinite}
 .fu .res .vap path:nth-child(2){animation-delay:.3s}.fu .res .vap path:nth-child(3){animation-delay:.6s}
 @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -177,9 +177,9 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
   </section>
 </main>
 <nav>
-  <button id="t-famiglia" onclick="vai('famiglia')"><span><svg viewBox="0 0 32 32" width="28" height="28"><circle cx="9.5" cy="9" r="4" fill="#F2994A"/><path d="M3 27c0-6 2.8-10 6.5-10s6.5 4 6.5 10z" fill="#E76F51"/><circle cx="22.5" cy="9" r="4" fill="#4C9BE8"/><path d="M16 27c0-6 2.8-10 6.5-10S29 21 29 27z" fill="#2F7DD1"/><circle cx="16" cy="16.5" r="3.4" fill="#F2C94C"/><path d="M10.5 29c0-4.5 2.4-7.4 5.5-7.4s5.5 2.9 5.5 7.4z" fill="#27AE60"/><path d="M16 3.4c-.9-1.5-3-.7-2.4.9.4 1 2.4 2.1 2.4 2.1s2-1.1 2.4-2.1c.6-1.6-1.5-2.4-2.4-.9z" fill="#EB5757"/></svg></span>Famiglia</button>
-  <button id="t-piatti" onclick="vai('piatti')"><span><svg viewBox="0 0 32 32" width="28" height="28"><g class="vap" fill="none" stroke="#E9A23B" stroke-width="2" stroke-linecap="round"><path d="M10 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M16 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M22 10c-2.2-2 2.2-3.4 0-6.4"/></g><path d="M3 15.5h26a13 11.5 0 0 1-26 0z" fill="#2F6B3A"/><ellipse cx="16" cy="15.5" rx="13" ry="2.4" fill="#F2B705"/><rect x="9.5" y="26.2" width="13" height="2.6" rx="1.3" fill="#1D2B1A"/></svg></span>Piatti</button>
-  <button id="t-proposte" onclick="vai('proposte')"><span><svg viewBox="0 0 32 32" width="28" height="28"><rect x="3" y="7" width="26" height="19" rx="4" fill="#4C9BE8"/><path d="M4 10l12 9 12-9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="8" r="4.5" fill="#F2B705"/></svg></span>Proposte<b class="bd" id="bd"></b></button>
+  <button id="t-famiglia" onclick="vai('famiglia')"><span><svg viewBox="0 0 32 32" width="28" height="28"><circle cx="9.5" cy="9" r="4" fill="#F2994A"/><path d="M3 27c0-6 2.8-10 6.5-10s6.5 4 6.5 10z" fill="#E76F51"/><circle cx="22.5" cy="9" r="4" fill="#4C9BE8"/><path d="M16 27c0-6 2.8-10 6.5-10S29 21 29 27z" fill="#2F7DD1"/><circle cx="16" cy="16.5" r="3.4" fill="#F2C94C"/><path d="M10.5 29c0-4.5 2.4-7.4 5.5-7.4s5.5 2.9 5.5 7.4z" fill="#8E6FD8"/><path d="M16 3.4c-.9-1.5-3-.7-2.4.9.4 1 2.4 2.1 2.4 2.1s2-1.1 2.4-2.1c.6-1.6-1.5-2.4-2.4-.9z" fill="#EB5757"/></svg></span>Famiglia</button>
+  <button id="t-piatti" onclick="vai('piatti')"><span><svg viewBox="0 0 32 32" width="28" height="28"><g class="vap" fill="none" stroke="#E9A23B" stroke-width="2" stroke-linecap="round"><path d="M10 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M16 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M22 10c-2.2-2 2.2-3.4 0-6.4"/></g><path d="M3 15.5h26a13 11.5 0 0 1-26 0z" fill="#2C7BC1"/><ellipse cx="16" cy="15.5" rx="13" ry="2.4" fill="#F2B705"/><rect x="9.5" y="26.2" width="13" height="2.6" rx="1.3" fill="#14263A"/></svg></span>Piatti</button>
+  <button id="t-proposte" onclick="vai('proposte')"><span><svg viewBox="0 0 32 32" width="28" height="28"><rect x="3" y="7" width="26" height="19" rx="4" fill="#4C9BE8"/><path d="M4 10l12 9 12-9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Proposte<b class="bd" id="bd"></b></button>
   <button id="t-storico" onclick="vai('storico')"><span id="ic-storico">📅</span>Storico</button>
 </nav>
 <div class="ov hide" id="mod"><div class="sheet" id="sheet"></div></div>
@@ -205,12 +205,13 @@ const GGF=["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Dom
 const quando=p=>[p.g!=null?GGF[p.g]:"",p.pa?"a "+p.pa:""].filter(Boolean).join(" ");
 const selGP=(g,pa,pre)=>`<label class="l">Giorno<select id="${pre}G"><option value="">Nessun giorno</option>${GGF.map((x,i)=>`<option value="${i}" ${g===i?"selected":""}>${x}</option>`).join("")}</select></label><label class="l">Pasto<select id="${pre}P"><option value="">Nessun pasto</option>${PP.map(x=>`<option value="${x}" ${pa===x?"selected":""}>${PI[x]} ${x}</option>`).join("")}</select></label>`;
 const leggiGP=pre=>{const g=$(pre+"G").value,p=$(pre+"P").value;return{g:g===""?null:+g,pa:p||null}};
-const BOWL='<svg viewBox="0 0 32 32" width="120" height="120"><g class="vap" fill="none" stroke="#E9A23B" stroke-width="1.6" stroke-linecap="round"><path d="M10 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M16 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M22 10c-2.2-2 2.2-3.4 0-6.4"/></g><path d="M3 15.5h26a13 11.5 0 0 1-26 0z" fill="#7FC48A"/><ellipse cx="16" cy="15.5" rx="13" ry="2.4" fill="#F2B705"/><rect x="9.5" y="26.2" width="13" height="2.6" rx="1.3" fill="#F5F8EE"/></svg>';
+const BOWL='<svg viewBox="0 0 32 32" width="120" height="120"><g class="vap" fill="none" stroke="#E9A23B" stroke-width="1.6" stroke-linecap="round"><path d="M10 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M16 10c-2.2-2 2.2-3.4 0-6.4"/><path d="M22 10c-2.2-2 2.2-3.4 0-6.4"/></g><path d="M3 15.5h26a13 11.5 0 0 1-26 0z" fill="#6FB6EE"/><ellipse cx="16" cy="15.5" rx="13" ry="2.4" fill="#F2B705"/><rect x="9.5" y="26.2" width="13" height="2.6" rx="1.3" fill="#EEF6FD"/></svg>';
 // emoji per tipo di cibo (si cerca nel nome)
 const EMO={};
 "🍝:pasta,spaghett,penne,rigaton,fusill,tagliatell,lasagn,gnocch,tortellin,ravioli,maccheron,farfall|🍚:riso,risott,basmati|🥚:uova,uovo|🥛:latte,panna|🧈:burro,margarina|🧀:formaggio,mozzarella,parmigian,grana,pecorino,ricotta,mascarpone,gorgonzola,provola,scamorza,stracchino,fontina,emmental|🥣:yogurt,cereali,muesli,fiocchi|🍞:pane,pancarr,toast,panino,grissin,cracker,fette biscottate|🥖:baguette,ciabatta,filone,rosetta|🥐:cornett,brioche,croissant|🌯:piadina,tortilla,wrap,burrito|🥓:prosciutto,pancetta,guanciale,bacon,speck,salame,mortadella,bresaola,salsicc,wurstel|🥩:carne,manzo,vitello,maiale,bistecca,macinat,arrosto|🍔:hamburger|🍗:pollo,tacchino,coscia,petto|🐟:pesce,tonno,salmone,merluzzo,branzino,orata,sgombro,acciug,sardin,baccal|🦐:gamber,scamp,mazzancoll|🦑:calamar,totan,seppi|🐙:polpo|🦀:granchio|🍅:pomodor,passata,pelati,sugo|🥔:patat|🥕:carot|🧅:cipoll,scalogn|🧄:aglio|🥒:zucchin,cetriol|🥦:broccol,cavolfior|🥬:insalata,lattuga,rucola,spinaci,bietol,radicchio,cicoria,verza,cavolo,sedano,finocchi,carciofi,asparagi|🍆:melanzan|🫑:peperon|🌶️:peperoncino|🌽:mais,granoturco|🍄:funghi,fungo,porcini,champignon|🥑:avocado|🎃:zucca|🌿:basilico,prezzemolo,rosmarino,salvia,menta,origano,timo,erbe|🧂:sale,spezie,pepe|🫒:olio,olive,oliva|🫘:fagioli,ceci,lenticchie,piselli,fave,soia,legumi|🥜:arachidi,noci,mandorle,nocciole,pistacch,anacardi|🍎:mela,mele|🍐:pera,pere|🍊:arancia,arance,mandarin,clementin|🍋:limone,limoni|🍌:banana,banane|🍉:anguria,cocomero|🍇:uva|🍓:fragol,frutta,frutti|🫐:mirtill,lampon,mora|🍑:pesca,pesche,albicocc|🍒:cilieg|🍍:ananas|🥭:mango|🥥:cocco|🥝:kiwi|🍯:miele,marmellata|🍬:zucchero,caramell|🍫:cioccolat,nutella,cacao|🍪:biscott,frollin,wafer|🍰:torta,dolce,crostata,plumcake,tiramis|🧁:muffin|🍩:ciambell,donut|🍦:gelato|🍕:pizza|🥫:scatola,conserva,sottaceti,maionese,senape,pesto,capperi,ketchup|🍶:aceto,salsa di soia|🥞:pancake,crepes|🌾:farina,semola,amido,lievito,pangrattato|☕:caffè,caffe,cialde|🍵:tè,tisana,camomilla,infuso|🧃:succo,spremuta|🥤:cola,aranciata,bibita,gazzosa|🍺:birra|🍷:vino,prosecco,spumante|💧:acqua|🍜:brodo,zuppa,minestra,ramen|🍲:minestrone,polenta|🍣:sushi|🥨:salatini,patatine".split("|").forEach(g=>{const[e,k]=g.split(":");k.split(",").forEach(x=>EMO[x]=e)});
 function trova(T,n){n=n.toLowerCase();let b="";for(const k in T)if(n.includes(k)&&k.length>b.length)b=k;return b?T[b]:""}
-const emoji=n=>trova(EMO,n)||"🍽️";
+let emoCustom={};
+const emoji=n=>emoCustom[n]||trova(EMO,n)||"🍽️";
 // catalogo ingredienti per categoria
 const CAT={};
 "Verdure=pomodoro,patate,carote,cipolla,aglio,zucchine,cetrioli,broccoli,cavolfiore,insalata,spinaci,rucola,melanzane,peperoni,mais,funghi,zucca,avocado,basilico,prezzemolo,rosmarino,sedano,finocchi,carciofi|Frutta=mela,pera,banana,arancia,limone,fragole,uva,pesca,anguria,kiwi,ananas,mirtilli,ciliegie,mango|Carne=pollo,tacchino,manzo,maiale,salsicce,prosciutto,pancetta,guanciale,macinato,bistecca,wurstel,salame,speck,hamburger|Pesce=tonno,salmone,merluzzo,gamberi,calamari,polpo,acciughe,orata,branzino|Latticini=latte,uova,burro,yogurt,mozzarella,parmigiano,formaggio,ricotta,mascarpone,panna,pecorino|Pasta e pane=pasta,spaghetti,riso,farina,pane,pangrattato,cereali,gnocchi,polenta,biscotti,piadina,pizza,lievito,fette biscottate|Legumi=fagioli,ceci,lenticchie,piselli,fave,soia|Condimenti=olio,sale,pepe,aceto,zucchero,miele,marmellata,passata,sugo,brodo,olive,maionese,senape,pesto,capperi|Dolci e bevande=cioccolato,nutella,gelato,torta,caffè,tè,succo,vino,birra,acqua|Frutta secca=noci,mandorle,nocciole,arachidi,pistacchi".split("|").forEach(g=>{const[c,l]=g.split("=");CAT[c]=l.split(",")});
@@ -218,7 +219,7 @@ const CAT={};
 // ---- stato ----
 let utente="",fams=[],act="",legacyP=[],prefs=new Set();                                // salvati sul telefono
 let membri=[],nomeFam="",custom=[],legacy=[],plan=[],proposte=[],piatti=[];       // dalla famiglia attiva
-let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editId="",primoD=true,modStack=[],pot=[],catSel="Tutti",tmpX=null,primoP=true,visti={},_nk="",_tt=null,_cf=null;
+let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editId="",primoD=true,modStack=[],pot=[],catSel="Tutti",tmpX=null,nuovoI=null,primoP=true,visti={},_nk="",_tt=null,_cf=null;
 
 function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,fams,act,legacyP}))}catch(e){}}
 function carica(){
@@ -310,7 +311,7 @@ function attiva(){
   if(getSeen()===null)setSeen();
   unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
   const sub=(n,fn,on)=>unsubs.push(col(n).onSnapshot(sn=>{if(on)on(sn);fn(sn.docs.map(d=>Object.assign({id:d.id},d.data())));draw()}));
-  sub("ingredienti",a=>{custom=a});
+  sub("ingredienti",a=>{custom=a;emoCustom={};a.forEach(x=>{if(x.e)emoCustom[norm(x.n||"")]=x.e})});
   sub("dispensa",a=>{legacy=a.map(x=>x.n).filter(Boolean)});   // vecchia dispensa: i cibi diventano ingredienti
   sub("planner",a=>{plan=a});
   sub("piatti",a=>{piatti=a.sort((x,y)=>x.n.localeCompare(y.n))},migraPiatti);
@@ -412,16 +413,47 @@ function uiIng(){
   $("iGrid").innerHTML=(nuovo?`<button class="tile" style="border-style:dashed" data-n="${esc(q)}" onclick="nuovoIng(this.dataset.n)"><span class="e">➕</span>Aggiungi «${esc(q)}»</button>`:"")+
     l.map(x=>`<button class="tile ${pot.includes(x.n)?"on":""}" data-n="${esc(x.n)}" onclick="togIng(this.dataset.n)"><span class="e">${emoji(x.n)}</span>${esc(x.n)}</button>`).join("");
 }
+const EMOJ_SCELTA=["🍎","🍊","🍋","🍌","🍇","🍓","🥭","🍑","🥬","🥕","🥔","🍅","🧅","🌶️","🍄","🥦","🌽","🥩","🍗","🐟","🦐","🧀","🥚","🥛","🍞","🍝","🍚","🫘","🥜","🌿","🍯","🧂","🍫","🍰","🍷","☕","🥤","🥫","🍽️"];
+// dal testo di Wikipedia al tipo di cibo (si controlla in quest'ordine)
+const REGOLE=[[/formagg|latticin|caseific|yogurt/,"🧀"],[/\buov[ao]\b/,"🥚"],[/\bfung[hoi]|champignon|porcin/,"🍄"],[/legum|fagiol|\bceci\b|lenticch/,"🫘"],[/crostace|gambero|scampo|aragost/,"🦐"],[/\bpesce|\bittic|mollusch|salmon|\btonno|cefalop/,"🐟"],[/\bcarne|\bsalum|insaccat|bovin|suin|\bmaiale|\bpollo|\bmanzo|prosciutt|salsicc/,"🥩"],[/spezi[ae]|aromatic|erba culinaria|\bzenzero|\bpepe\b/,"🌿"],[/ortagg|\bverdur|\binsalat|vegetale commestibile|radice commestibile/,"🥬"],[/frutta secca|\bnoce|mandorl|nocciol|arachid|pistacch|semi oleos/,"🥜"],[/agrum/,"🍊"],[/\bfrutt|\bbacca|\bdrupa|\bpomo\b/,"🍎"],[/\bpasta\b|spaghett|tagliatell/,"🍝"],[/cereal|\briso\b|\bfarina|\bpane\b|lievitat|\bgrano\b/,"🌾"],[/dolce|dessert|cioccolat|biscott|\btorta|pasticc|caramell|gelato/,"🍰"],[/\bvino\b|liquore|distillat|spirit/,"🍷"],[/\bbirra/,"🍺"],[/bevanda|infuso|\btè\b|\bcaffè|succo/,"🥤"],[/\bolio|\bgrasso|\bburro|margarin/,"🧈"],[/\bsalsa|\bsugo|condiment|conserva/,"🥫"],[/\bzuppa|minestra|\bbrodo/,"🍲"]];
+function emojiDaTesto(t){t=(t||"").toLowerCase();for(const[r,e]of REGOLE)if(r.test(t))return e;return ""}
+async function cercaWiki(n){
+  const ac=new AbortController(),t=setTimeout(()=>ac.abort(),7000);
+  try{
+    const r=await fetch("https://it.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=3&prop=extracts%7Cdescription&exintro=1&explaintext=1&exchars=350&redirects=1&gsrsearch="+encodeURIComponent(n),{signal:ac.signal});
+    const d=await r.json();
+    const p=Object.values((d.query||{}).pages||{}).sort((a,b)=>a.index-b.index)[0];
+    if(!p||!(p.title+" "+(p.extract||"")).toLowerCase().includes(n.slice(0,5)))return null;   // risultato non pertinente
+    return{titolo:p.title,desc:p.description||"",testo:p.extract||""};
+  }finally{clearTimeout(t)}
+}
 function nuovoIng(n){
   n=norm(n);if(!n)return;
-  if(act){const C=col("ingredienti");C.add({n}).then(r=>reg("Ingrediente aggiunto: "+n,()=>C.doc(r.id).delete()))}
+  if(emoji(n)!=="🍽️"){aggiungiIng(n,"");return}   // icona già nota
+  apriCerca(n);
+}
+function aggiungiIng(n,e){
+  if(act){const C=col("ingredienti");C.add(e?{n,e}:{n}).then(r=>reg("Ingrediente aggiunto: "+n,()=>C.doc(r.id).delete()))}
   if(!pot.includes(n))pot.push(n);
   $("iQ").value="";uiPiatti();
 }
+function apriCerca(n){
+  const mio=nuovoI={n,e:"🍽️"};
+  apri(`<h2 style="margin-top:0">Nuovo ingrediente: ${esc(n)}</h2><p class="sub" id="wiki">🔎 Cerco su Wikipedia…</p><div style="text-align:center;font-size:64px;line-height:1.2" id="wE">🍽️</div><p class="sub" style="margin-top:8px">Se non è giusta, scegli l'icona:</p><div class="grid">${EMOJ_SCELTA.map(e=>`<button class="tile" data-e="${e}" onclick="impostaE(this.dataset.e)"><span class="e">${e}</span></button>`).join("")}</div><button class="b w" onclick="confermaIng()">Conferma</button>`,true);
+  cercaWiki(n).then(r=>{
+    if(nuovoI!==mio||!$("wiki"))return;
+    if(!r){$("wiki").textContent="Non ho trovato niente su Wikipedia: scegli tu l'icona.";return}
+    const e=emojiDaTesto(r.desc)||emojiDaTesto(r.testo);
+    $("wiki").innerHTML=`📖 <b>${esc(r.titolo)}</b>${r.desc?" — "+esc(r.desc):""}${e?"":"<br>Non riconosco il tipo di cibo: scegli tu l'icona."}`;
+    if(e)impostaE(e);
+  }).catch(()=>{if(nuovoI===mio&&$("wiki"))$("wiki").textContent="Non riesco a collegarmi: scegli tu l'icona."});
+}
+function impostaE(e){if(!nuovoI)return;nuovoI.e=e;$("wE").textContent=e;document.querySelectorAll("#sheet .tile").forEach(t=>t.classList.toggle("on",t.dataset.e===e))}
+function confermaIng(){const x=nuovoI;if(!x)return;nuovoI=null;chiudi();aggiungiIng(x.n,x.e==="🍽️"?"":x.e)}
 function togIng(n){const i=pot.indexOf(n);if(i>=0)pot.splice(i,1);else pot.push(n);uiPiatti()}
 function uiPiatti(){
   const pr=proposte.find(p=>p.id===controId),ed=piatti.find(x=>x.id===editId);
-  $("cBan").innerHTML=controId?`<div style="background:var(--saffron);color:#1D2B1A;border-radius:10px;padding:10px;margin-bottom:10px"><b>Controproposta</b>${pr?" a "+esc(pr.n)+" di "+esc(pr.autore):""}<br><button class="g" style="margin-top:6px" onclick="controId='';controGP=null;uiPiatti()">Annulla</button></div>`:(ed?`<div style="background:var(--wbg);color:var(--wink);border-radius:10px;padding:10px;margin-bottom:10px"><b>Stai modificando:</b> ${esc(ed.n)}<br><button class="g" style="margin-top:6px" onclick="annullaMod()">Annulla</button></div>`:"");
+  $("cBan").innerHTML=controId?`<div style="background:var(--saffron);color:#14263A;border-radius:10px;padding:10px;margin-bottom:10px"><b>Controproposta</b>${pr?" a "+esc(pr.n)+" di "+esc(pr.autore):""}<br><button class="g" style="margin-top:6px" onclick="controId='';controGP=null;uiPiatti()">Annulla</button></div>`:(ed?`<div style="background:var(--wbg);color:var(--wink);border-radius:10px;padding:10px;margin-bottom:10px"><b>Stai modificando:</b> ${esc(ed.n)}<br><button class="g" style="margin-top:6px" onclick="annullaMod()">Annulla</button></div>`:"");
   $("pSalva").textContent=ed?"Salva modifiche":"🔥 Fondi gli ingredienti";
   $("pot").className="pot"+(pot.length?" pieno":"");
   $("pot").innerHTML=pot.length?pot.map(n=>`<span class="chip">${emoji(n)} ${esc(n)} <b data-n="${esc(n)}" onclick="togIng(this.dataset.n)">✕</b></span>`).join(""):'<div class="vuoto">🥘 La pentola è vuota.<br>Tocca gli ingredienti qui sotto per aggiungerli.</div>';
@@ -484,9 +516,9 @@ function tabHtml(get,click,nx){
 const pendList=()=>{const v=proposte.filter(vis);return v.filter(p=>p.autore!==utente&&rsp(p).includes(utente)&&!(p.risposte&&p.risposte[utente]))};
 function uiHome(){
   const nuove=pendList().length;
-  $("avviso").innerHTML=(nuove?`<div class="card" style="background:var(--saffron);color:#1D2B1A;font-weight:700" onclick="vai('proposte')">🔔 ${nuove} ${nuove===1?"proposta da valutare":"proposte da valutare"}</div>`:"")+
+  $("avviso").innerHTML=(nuove?`<div class="card" style="background:var(--saffron);color:#14263A;font-weight:700" onclick="vai('proposte')">🔔 ${nuove} ${nuove===1?"proposta da valutare":"proposte da valutare"}</div>`:"")+
     (nsup()&&Notification.permission==="default"?`<div class="card" style="font-weight:700" onclick="attivaNotif()">🔔 Attiva le notifiche per proposte e risposte</div>`:"")+
-    (deferred?`<div class="card" style="background:var(--green);color:#fff;font-weight:700" onclick="installa()">📲 Installa l'app sul telefono</div>`:"");
+    (deferred?`<div class="card" style="background:var(--main);color:#fff;font-weight:700" onclick="installa()">📲 Installa l'app sul telefono</div>`:"");
   const s=(new Date().getDay()+6)%7;let f=null;
   for(let i=0;i<7&&!f;i++){const g=(s+i)%7;for(const p of PP){const es=cellaE(g+"-"+p).filter(e=>!fatto(e));if(es.length){f={g,p,es};break}}}
   $("prossimo").innerHTML=f?`<div class="card next"><div class="when">Prossimo pasto · ${GG[f.g]} · ${f.p}</div>`+f.es.map(e=>`<h3>${etich(e)}</h3><div>${chips(e.i)}</div><button class="b w" onclick="completato('${e.id}')">Completato</button>`).join("")+`</div>`
@@ -552,7 +584,7 @@ function uiStor(){
 }
 function calSvg(sz){
   const d=new Date(),M=["GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO","SET","OTT","NOV","DIC"];
-  return `<svg viewBox="0 0 32 32" width="${sz}" height="${sz}" style="vertical-align:-3px"><rect x="3" y="5" width="26" height="24" rx="5" fill="#fff" stroke="#D9E2CC" stroke-width="1.5"/><path d="M3 10a5 5 0 0 1 5-5h16a5 5 0 0 1 5 5v3.5H3z" fill="#E76F51"/><rect x="9" y="2.5" width="3" height="6" rx="1.5" fill="#1D2B1A"/><rect x="20" y="2.5" width="3" height="6" rx="1.5" fill="#1D2B1A"/><text x="16" y="11.6" text-anchor="middle" font-size="5.6" font-weight="700" fill="#fff" font-family="Trebuchet MS,sans-serif">${M[d.getMonth()]}</text><text x="16" y="25.6" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1D2B1A" font-family="Georgia,serif">${d.getDate()}</text></svg>`;
+  return `<svg viewBox="0 0 32 32" width="${sz}" height="${sz}" style="vertical-align:-3px"><rect x="3" y="5" width="26" height="24" rx="5" fill="#fff" stroke="#D3E2F0" stroke-width="1.5"/><path d="M3 10a5 5 0 0 1 5-5h16a5 5 0 0 1 5 5v3.5H3z" fill="#E76F51"/><rect x="9" y="2.5" width="3" height="6" rx="1.5" fill="#14263A"/><rect x="20" y="2.5" width="3" height="6" rx="1.5" fill="#14263A"/><text x="16" y="11.6" text-anchor="middle" font-size="5.6" font-weight="700" fill="#fff" font-family="Trebuchet MS,sans-serif">${M[d.getMonth()]}</text><text x="16" y="25.6" text-anchor="middle" font-size="12.5" font-weight="700" fill="#14263A" font-family="Georgia,serif">${d.getDate()}</text></svg>`;
 }
 function uiNavIcons(){const k=new Date().toDateString();if(k===_nk)return;_nk=k;$("ic-storico").innerHTML=calSvg(28)}
 
