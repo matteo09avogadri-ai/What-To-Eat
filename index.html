@@ -115,10 +115,6 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
 .fu .res .vap path{animation:vap 1.6s ease-in-out infinite}
 .fu .res .vap path:nth-child(2){animation-delay:.3s}.fu .res .vap path:nth-child(3){animation-delay:.6s}
 @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-body[data-dir=l] main section{animation:inl .3s ease both}
-body[data-dir=r] main section{animation:inr .3s ease both}
-@keyframes inl{from{opacity:0;transform:translateX(38px)}to{opacity:1;transform:none}}
-@keyframes inr{from{opacity:0;transform:translateX(-38px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes up{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
 @keyframes tin{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translateX(-50%)}}
@@ -506,7 +502,7 @@ function completato(id){
 function cella(k){
   if(!act){alert("Prima entra in una famiglia.");return}
   const[g,p]=k.split("-");
-  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>`<div class="m"><span class="n">${etich(e)}</span><button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button></div>`).join("")+
+  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>`<div class="m"><span class="n">${etich(e)}</span>${fatto(e)?"":`<button class="g" onclick="chiudi();completato('${e.id}')">✅ Completato</button>`}<button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button></div>`).join("")+
     `<button class="b w" onclick="scegli('${k}')">➕ Aggiungi un piatto</button><button class="g" style="width:100%;margin-top:8px" onclick="scegliIng('${k}')">🥚 Un singolo ingrediente</button><button class="g" style="width:100%;margin-top:8px" onclick="opzioni('${k}','fuori')">🍴 Pasto fuori casa</button>`);
 }
 function togliPlan(id){const e=plan.find(x=>x.id===id);if(!e)return;const R=col("planner"),d=Object.assign({},e);delete d.id;R.doc(id).delete();reg("Piatto tolto: "+e.p,()=>R.doc(id).set(d))}
@@ -539,7 +535,7 @@ function inserisci(k,x,pers,rip,fuori){
 }
 function piano(pid){
   const p=proposte.find(x=>x.id===pid);if(!p)return;
-  apri(`<h2 style="margin-top:0">📅 ${esc(p.n)}</h2><label class="l">Giorno<select id="gG">${GGF.map((g,i)=>`<option value="${i}" ${p.g===i?"selected":""}>${g}</option>`).join("")}</select></label><label class="l">Pasto<select id="gP">${PP.map(x=>`<option value="${x}" ${p.pa===x?"selected":""}>${PI[x]} ${x}</option>`).join("")}</select></label>${persone(false,true)}${selQuando}<button class="b w" onclick="aggiungiDaProposta('${pid}')">Aggiungi al planner</button>`);
+  apri(`<h2 style="margin-top:0">${calSvg(22)} ${esc(p.n)}</h2><label class="l">Giorno<select id="gG">${GGF.map((g,i)=>`<option value="${i}" ${p.g===i?"selected":""}>${g}</option>`).join("")}</select></label><label class="l">Pasto<select id="gP">${PP.map(x=>`<option value="${x}" ${p.pa===x?"selected":""}>${PI[x]} ${x}</option>`).join("")}</select></label>${persone(false,true)}${selQuando}<button class="b w" onclick="aggiungiDaProposta('${pid}')">Aggiungi al planner</button>`);
 }
 function aggiungiDaProposta(pid){
   const p=proposte.find(x=>x.id===pid),pers=leggiPers();if(!p||!pers)return;
@@ -554,11 +550,12 @@ function uiStor(){
     const f=d=>d.getDate()+"/"+(d.getMonth()+1),op=apertoS===s;
     return `<div class="card" onclick="apertoS=apertoS==='${s}'?'':'${s}';uiStor()"><b>Dal ${f(a)} al ${f(b)}/${b.getFullYear()}</b> ${op?"▲":"▼"}${op?`<table style="margin-top:10px">${tabHtml(k=>plan.filter(e=>e.slot===k&&e.sett===s&&vis(e)),false)}</table>`:""}</div>`}).join(""):'<p class="empty">Ancora nessuna settimana passata.</p>';
 }
-function uiNavIcons(){
-  const d=new Date(),k=d.toDateString();if(k===_nk)return;_nk=k;
-  const M=["GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO","SET","OTT","NOV","DIC"];
-  $("ic-storico").innerHTML=`<svg viewBox="0 0 32 32" width="28" height="28"><rect x="3" y="5" width="26" height="24" rx="5" fill="#fff" stroke="#D9E2CC" stroke-width="1.5"/><path d="M3 10a5 5 0 0 1 5-5h16a5 5 0 0 1 5 5v3.5H3z" fill="#E76F51"/><rect x="9" y="2.5" width="3" height="6" rx="1.5" fill="#1D2B1A"/><rect x="20" y="2.5" width="3" height="6" rx="1.5" fill="#1D2B1A"/><text x="16" y="11.6" text-anchor="middle" font-size="5.6" font-weight="700" fill="#fff" font-family="Trebuchet MS,sans-serif">${M[d.getMonth()]}</text><text x="16" y="25.6" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1D2B1A" font-family="Georgia,serif">${d.getDate()}</text></svg>`;
+function calSvg(sz){
+  const d=new Date(),M=["GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO","SET","OTT","NOV","DIC"];
+  return `<svg viewBox="0 0 32 32" width="${sz}" height="${sz}" style="vertical-align:-3px"><rect x="3" y="5" width="26" height="24" rx="5" fill="#fff" stroke="#D9E2CC" stroke-width="1.5"/><path d="M3 10a5 5 0 0 1 5-5h16a5 5 0 0 1 5 5v3.5H3z" fill="#E76F51"/><rect x="9" y="2.5" width="3" height="6" rx="1.5" fill="#1D2B1A"/><rect x="20" y="2.5" width="3" height="6" rx="1.5" fill="#1D2B1A"/><text x="16" y="11.6" text-anchor="middle" font-size="5.6" font-weight="700" fill="#fff" font-family="Trebuchet MS,sans-serif">${M[d.getMonth()]}</text><text x="16" y="25.6" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1D2B1A" font-family="Georgia,serif">${d.getDate()}</text></svg>`;
 }
+function uiNavIcons(){const k=new Date().toDateString();if(k===_nk)return;_nk=k;$("ic-storico").innerHTML=calSvg(28)}
+
 
 // ---- proposte ----
 function invia(id){
@@ -607,7 +604,7 @@ function cardP(p,par){
   const on=v=>mia&&mia.v===v?" on":"";
   const acc=(p.autore===utente&&rs.some(m=>r[m]&&r[m].v==="si"))||(mia&&mia.v==="si");
   const bt=rs.includes(utente)&&p.autore!==utente?`<div class="btns"><button class="bt si${on("si")}" onclick="rispondi('${p.id}','si')">✅<br>Accetto</button><button class="bt no${on("no")}" onclick="rispondi('${p.id}','no')">❌<br>Rifiuto</button><button class="bt co${on("contro")}" onclick="contro('${p.id}')">💬<br>Controproposta</button></div>`:"";
-  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · riservata":""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">📅 ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">📅 Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
+  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · riservata":""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">${calSvg(16)} ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">${calSvg(18)} Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
 }
 function uiProp(){
   if(!act){$("propList").innerHTML='<p class="empty">Entra in una famiglia dalla pagina Famiglia.</p>';return}
@@ -665,23 +662,8 @@ $("mod").addEventListener("click",e=>{if(e.target===$("mod"))chiudi()});
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;draw()});
 addEventListener("appinstalled",()=>{deferred=null;draw()});
 function installa(){if(deferred){deferred.prompt();deferred=null;draw()}}
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)uiNavIcons()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)draw()});
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
-const ORD=["home","famiglia","piatti","proposte","storico"];
-let tx=0,ty=0,tOk=false;
-document.addEventListener("touchstart",e=>{
-  const t=e.touches[0];tx=t.clientX;ty=t.clientY;
-  tOk=e.touches.length===1&&tx>28&&tx<innerWidth-28&&$("mod").classList.contains("hide")&&!e.target.closest(".cats,input,select,textarea,.fu");   // i bordi restano al gesto di sistema
-},{passive:true});
-document.addEventListener("touchend",e=>{
-  if(!tOk)return;tOk=false;
-  const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
-  if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6)return;
-  const j=ORD.indexOf(pag)+(dx<0?1:-1);
-  if(j<0||j>=ORD.length)return;
-  document.body.dataset.dir=dx<0?"l":"r";setTimeout(()=>{delete document.body.dataset.dir},450);
-  vai(ORD[j]);
-},{passive:true});
 carica();draw();if(!utente)chiediNome();else avvia();
 </script>
 </body>
