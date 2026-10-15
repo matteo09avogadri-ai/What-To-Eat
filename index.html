@@ -218,7 +218,7 @@ const CAT={};
 
 // ---- stato ----
 let utente="",fams=[],act="",legacyP=[],prefs=new Set();                                // salvati sul telefono
-let membri=[],nomeFam="",custom=[],legacy=[],plan=[],proposte=[],piatti=[];       // dalla famiglia attiva
+let membri=[],nomeFam="",custom=[],legacy=[],plan=[],proposte=[],piatti=[],adminNome="";       // dalla famiglia attiva
 let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editId="",primoD=true,modStack=[],pot=[],catSel="Tutti",tmpX=null,nuovoI=null,primoP=true,visti={},_nk="",_tt=null,_cf=null;
 
 function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,fams,act,legacyP}))}catch(e){}}
@@ -241,7 +241,6 @@ const norm=s=>s.trim().toLowerCase();
 const ref=()=>db.collection("famiglie").doc(act);
 const col=n=>ref().collection(n);
 function lun(){const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-const dk=()=>lun()+"|"+utente;
 // destinatari: "tutti" oppure elenco di nomi
 const arr=p=>Array.isArray(p.per)?p.per:(p.per&&p.per!=="tutti"?[p.per]:null);
 const dest=p=>arr(p)||membri;
@@ -249,8 +248,14 @@ const toMe=p=>{const a=arr(p);return !a||a.includes(utente)};
 const vis=p=>p.autore===utente||toMe(p);
 const rsp=p=>dest(p).filter(m=>m!==p.autore);
 const perVal=(l,escl)=>{const base=escl?membri.filter(m=>m!==utente):membri;return base.length&&base.every(m=>l.includes(m))?"tutti":l};
-const fatto=e=>!!(e.done&&e.done[dk()]);
-const etich=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(arr(e)?" · "+arr(e).map(m=>m===utente?"io":esc(m)).join(", "):"")+(e.fisso?" 📌":"");
+const sonoAdmin=()=>adminNome===utente;
+const puoMod=x=>sonoAdmin()||x.autore===utente;                      // piatti: solo i propri, l'amministratore tutti
+const visE=e=>!e.priv||e.autore===utente;                              // planner: tutto è visibile tranne i piatti personali
+const mio=e=>dest(e).includes(utente);
+const chiave=(e,m)=>(e.sett||lun())+"|"+m;
+const fattoPer=(e,m)=>!!(e.done&&e.done[chiave(e,m)]);
+const fatto=e=>{const d=dest(e);return d.includes(utente)?fattoPer(e,utente):d.length>0&&d.every(m=>fattoPer(e,m))};
+const etich=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(arr(e)?" · "+arr(e).map(m=>m===utente?"io":esc(m)).join(", "):"")+(e.fisso?" 📌":"")+(e.priv?" 🔒":"");
 const chips=l=>(l||[]).map(i=>`<span class="ing">${emoji(i)} ${esc(i)}</span>`).join("");
 const ini=n=>`<span class="av s">${esc((n||"?")[0].toUpperCase())}</span>`;
 const ordP=()=>[...piatti].sort((a,b)=>(prefs.has(b.id)?1:0)-(prefs.has(a.id)?1:0));
@@ -290,7 +295,7 @@ function cambiaNome(){apri(`<h2 style="margin-top:0">Il tuo nome</h2><input id="
 function salvaNome(){
   const v=$("wN").value.trim();if(!v)return;
   const vecchio=utente;utente=v;salva();chiudi();
-  if(online)fams.forEach(f=>{const r=db.collection("famiglie").doc(f.c);r.update({members:firebase.firestore.FieldValue.arrayRemove(vecchio)}).then(()=>r.update({members:firebase.firestore.FieldValue.arrayUnion(v)}))});
+  if(online)fams.forEach(f=>{const r=db.collection("famiglie").doc(f.c),FV=firebase.firestore.FieldValue;r.get().then(d=>{const x=d.data()||{},eraAdmin=(x.admin||(x.members||[])[0])===vecchio;return r.update({members:FV.arrayRemove(vecchio)}).then(()=>r.update(Object.assign({members:FV.arrayUnion(v)},eraAdmin?{admin:v}:{})))})});
   draw();
 }
 function avvia(){
@@ -305,11 +310,11 @@ function avvia(){
 
 // ---- famiglie ----
 function attiva(){
-  unsubs.forEach(f=>f());unsubs=[];primoP=true;visti={};membri=[];custom=[];legacy=[];plan=[];proposte=[];piatti=[];primoD=true;nomeFam="";try{prefs=new Set(JSON.parse(localStorage.getItem("pf_"+act)||"[]"))}catch(e){prefs=new Set()}
+  unsubs.forEach(f=>f());unsubs=[];primoP=true;visti={};membri=[];custom=[];legacy=[];plan=[];proposte=[];piatti=[];primoD=true;nomeFam="";adminNome="";try{prefs=new Set(JSON.parse(localStorage.getItem("pf_"+act)||"[]"))}catch(e){prefs=new Set()}
   if(!online||!act){draw();return}
   if(!fams.find(x=>x.c===act)&&fams.length){act=fams[0].c;salva()}
   if(getSeen()===null)setSeen();
-  unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
+  unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";adminNome=x.admin||membri[0]||"";if(!x.admin&&membri[0]===utente)ref().update({admin:utente});const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
   const sub=(n,fn,on)=>unsubs.push(col(n).onSnapshot(sn=>{if(on)on(sn);fn(sn.docs.map(d=>Object.assign({id:d.id},d.data())));draw()}));
   sub("ingredienti",a=>{custom=a;emoCustom={};a.forEach(x=>{if(x.e)emoCustom[norm(x.n||"")]=x.e})});
   sub("dispensa",a=>{legacy=a.map(x=>x.n).filter(Boolean)});   // vecchia dispensa: i cibi diventano ingredienti
@@ -320,7 +325,7 @@ function attiva(){
 function creaFam(nome){
   nome=(nome||"").trim()||"La mia famiglia";
   const L="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c="";for(let i=0;i<5;i++)c+=L[Math.floor(Math.random()*L.length)];
-  db.collection("famiglie").doc(c).set({nome,members:[utente]}).then(()=>{fams.push({c,n:nome});act=c;salva();$("cNome").value="";attiva();toast("Famiglia creata!")}).catch(()=>alert("Non riesco a creare la famiglia."));
+  db.collection("famiglie").doc(c).set({nome,members:[utente],admin:utente}).then(()=>{fams.push({c,n:nome});act=c;salva();$("cNome").value="";attiva();toast("Famiglia creata!")}).catch(()=>alert("Non riesco a creare la famiglia."));
 }
 function entra(c){
   c=(c||"").trim().toUpperCase();if(!c)return;
@@ -334,13 +339,17 @@ function entra(c){
 function cambiaFam(c){act=c;salva();attiva();toast("Famiglia cambiata")}
 function esci(c){
   conferma("Uscire da questa famiglia?",()=>{
-    db.collection("famiglie").doc(c).update({members:firebase.firestore.FieldValue.arrayRemove(utente)}).catch(()=>{});
+    const r=db.collection("famiglie").doc(c),FV=firebase.firestore.FieldValue;
+    r.get().then(d=>{const x=d.data()||{},ms=x.members||[],upd={members:FV.arrayRemove(utente)};   // se esce l'amministratore, il ruolo passa a un altro
+      if((x.admin||ms[0])===utente){const nx=ms.find(m=>m!==utente);if(nx)upd.admin=nx}
+      return r.update(upd)}).catch(()=>{});
     fams=fams.filter(f=>f.c!==c);
     if(act===c)act=fams[0]?fams[0].c:"";
     salva();
     if(!fams.length)creaFam("Casa di "+utente);else attiva();
   });
 }
+function cedi(n){conferma("Cedere il ruolo di amministratore a "+n+"?",()=>ref().update({admin:n}).then(()=>toast(n+" è il nuovo amministratore")))}
 function baseUrl(){
   if(URL_APP)return URL_APP.replace(/[?#].*$/,"");
   if(location.protocol.startsWith("http"))return location.origin+location.pathname.replace(/index\.html$/,"");
@@ -356,7 +365,7 @@ function copiaLink(){
 function uiFam(){
   $("famList").innerHTML=online?`<p class="sub">Le tue famiglie. Tocca per passare all'altra.</p>`+fams.map(f=>`<button class="g ${f.c===act?'on':''}" style="margin:0 6px 6px 0" onclick="cambiaFam('${f.c}')">${esc(f.n||f.c)}</button>`).join(""):'<p class="empty">Il collegamento online non è disponibile.</p>';
   $("famDet").innerHTML=act?`<div class="card"><div class="when">Codice ${esc(act)}</div><h3 style="font-size:26px;margin:4px 0 10px;font-family:Georgia,serif">${esc(nomeFam||"La mia famiglia")}</h3><button class="b" onclick="copiaLink()">Invita con un link</button></div>
-  <h2>Membri</h2>`+membri.map(m=>`<div class="m">${ini(m)}<span class="n">${esc(m)}${m===utente?" (tu)":""}</span></div>`).join("")+
+  <p class="sub" style="margin:10px 0 0">${sonoAdmin()?"👑 Sei l'amministratore: puoi gestire i piatti di tutti e assegnare pasti agli altri.":"👑 Amministratore: "+esc(adminNome)}</p><h2>Membri</h2>`+membri.map(m=>`<div class="m">${ini(m)}<span class="n">${esc(m)}${m===utente?" (tu)":""}${m===adminNome?" 👑":""}</span>${sonoAdmin()&&m!==utente?`<button class="g" data-n="${esc(m)}" onclick="cedi(this.dataset.n)">Rendi amministratore</button>`:""}</div>`).join("")+
   `<button class="g r" style="margin-top:22px" onclick="esci('${act}')">Esci da questa famiglia</button>`:"";
 }
 
@@ -458,12 +467,12 @@ function uiPiatti(){
   $("pot").className="pot"+(pot.length?" pieno":"");
   $("pot").innerHTML=pot.length?pot.map(n=>`<span class="chip">${emoji(n)} ${esc(n)} <b data-n="${esc(n)}" onclick="togIng(this.dataset.n)">✕</b></span>`).join(""):'<div class="vuoto">🥘 La pentola è vuota.<br>Tocca gli ingredienti qui sotto per aggiungerli.</div>';
   uiIng();
-  $("pList").innerHTML=ordP().map(x=>`<div class="card"><div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${prefs.has(x.id)?"⭐ ":""}${esc(x.n)}</b><button class="g" style="padding:4px 11px;font-size:18px" onclick="preferito('${x.id}')" aria-label="Preferito">${prefs.has(x.id)?"★":"☆"}</button></div>${x.autore&&x.autore!==utente?`<div class="when">di ${esc(x.autore)}</div>`:""}<div>${chips(x.i)}</div><button class="b" style="margin-top:10px" onclick="invia('${x.id}')">Proponi alla famiglia</button> <button class="g" onclick="modifica('${x.id}')">✏️ Modifica</button> <button class="g r" onclick="togliPiatto('${x.id}')">Elimina</button></div>`).join("")||'<p class="empty">Nessun piatto: creane uno qui sopra.</p>';
+  $("pList").innerHTML=ordP().map(x=>`<div class="card"><div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${prefs.has(x.id)?"⭐ ":""}${esc(x.n)}</b><button class="g" style="padding:4px 11px;font-size:18px" onclick="preferito('${x.id}')" aria-label="Preferito">${prefs.has(x.id)?"★":"☆"}</button></div>${x.autore&&x.autore!==utente?`<div class="when">di ${esc(x.autore)}</div>`:""}<div>${chips(x.i)}</div><button class="b" style="margin-top:10px" onclick="invia('${x.id}')">Proponi alla famiglia</button> ${puoMod(x)?`<button class="g" onclick="modifica('${x.id}')">✏️ Modifica</button> <button class="g r" onclick="togliPiatto('${x.id}')">Elimina</button>`:""}</div>`).join("")||'<p class="empty">Nessun piatto: creane uno qui sopra.</p>';
 }
 function salvaPref(){try{localStorage.setItem("pf_"+act,JSON.stringify([...prefs]))}catch(e){}}
 function preferito(id){const x=piatti.find(p=>p.id===id);if(!x)return;const v=prefs.has(id);v?prefs.delete(id):prefs.add(id);salvaPref();uiPiatti();reg((v?"Tolto dai preferiti: ":"Preferito: ")+x.n,()=>{v?prefs.add(id):prefs.delete(id);salvaPref();uiPiatti()})}
-function togliPiatto(id){const x=piatti.find(p=>p.id===id);if(!x)return;const C=col("piatti"),d={n:x.n,i:x.i,autore:x.autore||utente};C.doc(id).delete();reg("Piatto eliminato: "+x.n,()=>C.doc(id).set(d))}
-function modifica(id){const x=piatti.find(p=>p.id===id);if(!x)return;editId=id;controId="";pot=[...x.i];$("pN").value=x.n;uiPiatti();scrollTo(0,0)}
+function togliPiatto(id){const x=piatti.find(p=>p.id===id);if(!x)return;if(!puoMod(x)){alert("Solo l'amministratore può eliminare i piatti degli altri.");return}const C=col("piatti"),d={n:x.n,i:x.i,autore:x.autore||utente};C.doc(id).delete();reg("Piatto eliminato: "+x.n,()=>C.doc(id).set(d))}
+function modifica(id){const x=piatti.find(p=>p.id===id);if(!x)return;if(!puoMod(x)){alert("Solo l'amministratore può modificare i piatti degli altri.");return}editId=id;controId="";pot=[...x.i];$("pN").value=x.n;uiPiatti();scrollTo(0,0)}
 function annullaMod(){editId="";pot=[];$("pN").value="";uiPiatti()}
 function fondi(){
   const n=$("pN").value.trim();
@@ -471,6 +480,7 @@ function fondi(){
   if(!n){alert("Dai un nome al piatto.");$("pN").focus();return}
   const ing=[...pot],C=col("piatti"),ed=piatti.find(x=>x.id===editId);
   if(ed){
+    if(!puoMod(ed)){alert("Solo l'amministratore può modificare i piatti degli altri.");return}
     const id=ed.id,orig={n:ed.n,i:ed.i};
     C.doc(id).update({n,i:ing});editId="";pot=[];$("pN").value="";uiPiatti();
     reg("Piatto modificato: "+n,()=>C.doc(id).update(orig));return;
@@ -494,16 +504,17 @@ function anima(ings,nome,fine){
 }
 
 // ---- scelta delle persone con le leve ----
-function persone(escl,tutti){
-  const l=membri.filter(m=>!escl||m!==utente);
-  if(!l.length)return '<p class="sub">Non ci sono altri familiari: invita qualcuno dalla pagina Famiglia.</p>';
-  return '<div class="l" style="margin-top:12px">Per chi?</div>'+l.map(m=>`<label class="sw"><span>${esc(m)}${m===utente?" (io)":""}</span><input type="checkbox" class="tg" data-n="${esc(m)}" ${tutti||m===utente?"checked":""}><i></i></label>`).join("");
+function persone(lista,on){
+  if(!lista.length)return '<p class="sub">Non ci sono altri familiari: invita qualcuno dalla pagina Famiglia.</p>';
+  return '<div class="l" style="margin-top:12px">Per chi?</div>'+lista.map(m=>`<label class="sw"><span>${esc(m)}${m===utente?" (io)":""}</span><input type="checkbox" class="tg" data-n="${esc(m)}" ${on(m)?"checked":""}><i></i></label>`).join("");
 }
+const privSw=()=>`<label class="sw"><span>🔒 Personale: solo io lo vedo<br><small style="font-weight:400;color:var(--soft)">Vale se è solo per te</small></span><input type="checkbox" id="aPriv"><i></i></label>`;
+const getX=id=>id==="ing"?tmpX:piatti.find(p=>p.id===id);
 function leggiPers(){const l=[...document.querySelectorAll("#sheet .tg:checked")].map(x=>x.dataset.n);if(!l.length){alert("Scegli almeno una persona.");return null}return l}
 const selQuando='<label class="l">Quando?<select id="aRip"><option value="0">Solo questa settimana</option><option value="1">📌 Fisso ogni settimana</option><option value="2">📌 Fisso tutti i giorni (questo pasto)</option></select></label>';
 
 // ---- planner ----
-const cellaE=k=>plan.filter(e=>e.slot===k&&vis(e)&&(e.fisso||e.sett===lun()));
+const cellaE=k=>plan.filter(e=>e.slot===k&&visE(e)&&(e.fisso||e.sett===lun()));
 function tabHtml(get,click,nx){
   const oggi=(new Date().getDay()+6)%7;
   let h="<tr><th></th>"+PP.map(p=>`<th>${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</th>`).join("")+"</tr>";
@@ -520,24 +531,34 @@ function uiHome(){
     (nsup()&&Notification.permission==="default"?`<div class="card" style="font-weight:700" onclick="attivaNotif()">🔔 Attiva le notifiche per proposte e risposte</div>`:"")+
     (deferred?`<div class="card" style="background:var(--main);color:#fff;font-weight:700" onclick="installa()">📲 Installa l'app sul telefono</div>`:"");
   const s=(new Date().getDay()+6)%7;let f=null;
-  for(let i=0;i<7&&!f;i++){const g=(s+i)%7;for(const p of PP){const es=cellaE(g+"-"+p).filter(e=>!fatto(e));if(es.length){f={g,p,es};break}}}
+  for(let i=0;i<7&&!f;i++){const g=(s+i)%7;for(const p of PP){const es=cellaE(g+"-"+p).filter(e=>mio(e)&&!fattoPer(e,utente));if(es.length){f={g,p,es};break}}}
   $("prossimo").innerHTML=f?`<div class="card next"><div class="when">Prossimo pasto · ${GG[f.g]} · ${f.p}</div>`+f.es.map(e=>`<h3>${etich(e)}</h3><div>${chips(e.i)}</div><button class="b w" onclick="completato('${e.id}')">Completato</button>`).join("")+`</div>`
     :`<div class="card next"><div class="when">Prossimo pasto</div><p class="empty">${act?"Nessun pasto in programma. Tocca una casella della tabella per aggiungerne uno.":"Entra in una famiglia dalla pagina Famiglia."}</p></div>`;
   $("tab").innerHTML=tabHtml(cellaE,true,f&&f.g+"-"+f.p);
 }
-function completato(id){
-  const e=plan.find(x=>x.id===id);if(!e)return;
-  const R=col("planner"),fp=new firebase.firestore.FieldPath("done",dk());
-  R.doc(id).update(fp,true);
-  reg("Pasto completato: "+e.p,()=>R.doc(id).update(fp,firebase.firestore.FieldValue.delete()));
+function segna(id,lista,msg){
+  const e=plan.find(x=>x.id===id);if(!e||!lista.length)return;
+  const R=col("planner"),fps=lista.map(m=>new firebase.firestore.FieldPath("done",chiave(e,m)));
+  fps.forEach(fp=>R.doc(id).update(fp,true));
+  reg(msg+": "+e.p,()=>Promise.all(fps.map(fp=>R.doc(id).update(fp,firebase.firestore.FieldValue.delete()))));
+}
+function completato(id){const e=plan.find(x=>x.id===id);if(e&&mio(e))segna(id,[utente],"Pasto completato")}
+function completaAltri(id){
+  const e=plan.find(x=>x.id===id);if(!e||!sonoAdmin())return;
+  segna(id,dest(e).filter(m=>m!==utente&&!fattoPer(e,m)),"Completato per gli altri");
 }
 function cella(k){
   if(!act){alert("Prima entra in una famiglia.");return}
-  const[g,p]=k.split("-");
-  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>`<div class="m"><span class="n">${etich(e)}</span>${fatto(e)?"":`<button class="g" onclick="chiudi();completato('${e.id}')">✅ Completato</button>`}<button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button></div>`).join("")+
+  const[g,p]=k.split("-"),ad=sonoAdmin();
+  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>{
+    const altri=dest(e).filter(m=>m!==utente&&!fattoPer(e,m)),b=[];
+    if(mio(e)&&!fattoPer(e,utente))b.push(`<button class="g" onclick="chiudi();completato('${e.id}')">✅ Completato</button>`);
+    if(ad&&altri.length)b.push(`<button class="g" onclick="chiudi();completaAltri('${e.id}')">✅ Per ${altri.length===1?esc(altri[0]):"gli altri"}</button>`);
+    if(ad||e.autore===utente)b.push(`<button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button>`);
+    return `<div class="card" style="margin-top:8px"><b>${etich(e)}</b>${fatto(e)?' <span class="when">· fatto</span>':""}<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${b.join("")}</div></div>`}).join("")+
     `<button class="b w" onclick="scegli('${k}')">➕ Aggiungi un piatto</button><button class="g" style="width:100%;margin-top:8px" onclick="scegliIng('${k}')">🥚 Un singolo ingrediente</button><button class="g" style="width:100%;margin-top:8px" onclick="opzioni('${k}','fuori')">🍴 Pasto fuori casa</button>`);
 }
-function togliPlan(id){const e=plan.find(x=>x.id===id);if(!e)return;const R=col("planner"),d=Object.assign({},e);delete d.id;R.doc(id).delete();reg("Piatto tolto: "+e.p,()=>R.doc(id).set(d))}
+function togliPlan(id){const e=plan.find(x=>x.id===id);if(!e||!(sonoAdmin()||e.autore===utente))return;const R=col("planner"),d=Object.assign({},e);delete d.id;R.doc(id).delete();reg("Piatto tolto: "+e.p,()=>R.doc(id).set(d))}
 function scegli(k){
   apri(`<h2 style="margin-top:0">Scegli un piatto</h2>`+(ordP().map(x=>`<div class="card" onclick="opzioni('${k}','${x.id}')"><b>${prefs.has(x.id)?"⭐ ":""}${esc(x.n)}</b><div>${chips(x.i)}</div></div>`).join("")||'<p class="empty">Non ci sono ancora piatti: creane uno nella scheda Piatti.</p>'));
 }
@@ -549,38 +570,42 @@ function uiSIng(k){
   $("sRes").innerHTML=ingList().filter(x=>!q||x.n.includes(q)).slice(0,60).map(x=>`<button class="tile" data-n="${esc(x.n)}" onclick="tmpX={n:this.dataset.n,i:[this.dataset.n]};opzioni('${k}','ing')"><span class="e">${emoji(x.n)}</span>${esc(x.n)}</button>`).join("");
 }
 function opzioni(k,id){
-  const f=id==="fuori",t=f?"🍴 Pasto fuori casa":id==="ing"?tmpX.n:(piatti.find(p=>p.id===id)||{}).n||"";
-  apri(`<h2 style="margin-top:0">${esc(t)}</h2>${f?'<input id="aNote" placeholder="Dove? (facoltativo)" style="margin-top:0">':""}${persone(false,false)}${selQuando}<button class="b w" onclick="aggiungiPlan('${k}','${id}')">Aggiungi</button>`);
+  const f=id==="fuori",x=f?null:getX(id),t=f?"🍴 Pasto fuori casa":(x||{}).n||"",ad=sonoAdmin();
+  apri(`<h2 style="margin-top:0">${esc(t)}</h2>${f?'<input id="aNote" placeholder="Dove? (facoltativo)" style="margin-top:0">':""}${ad?persone(membri,m=>m===utente):'<p class="sub">Lo aggiungi per te. Per altre persone serve una proposta.</p>'}${privSw()}${selQuando}<button class="b w" onclick="aggiungiPlan('${k}','${id}')">Aggiungi</button>${!ad&&!f?`<button class="g" style="width:100%;margin-top:8px" onclick="invia('${id}','${k}')">💬 Proponi ad altri</button>`:""}`);
 }
 function aggiungiPlan(k,id){
-  const pers=leggiPers();if(!pers)return;
+  const pers=sonoAdmin()?leggiPers():[utente];if(!pers)return;     // i membri aggiungono solo per sé
   const f=id==="fuori",note=f?($("aNote").value||"").trim():"";
-  const x=id==="ing"?tmpX:f?{n:"Fuori casa"+(note?": "+note:""),i:[]}:piatti.find(p=>p.id===id);
+  const x=f?{n:"Fuori casa"+(note?": "+note:""),i:[]}:getX(id);
   if(!x)return;
-  inserisci(k,x,pers,+$("aRip").value,f);
+  inserisci(k,x,pers,+$("aRip").value,f,$("aPriv").checked);
 }
-function inserisci(k,x,pers,rip,fuori){
-  const pasto=k.split("-")[1],base={p:x.n,i:x.i,fuori:!!fuori,per:perVal(pers),autore:utente,fisso:rip>0,sett:rip>0?null:lun(),done:{}};
+function inserisci(k,x,pers,rip,fuori,priv){
+  const pasto=k.split("-")[1],base={p:x.n,i:x.i,fuori:!!fuori,per:perVal(pers),priv:!!priv&&pers.length===1&&pers[0]===utente,autore:utente,fisso:rip>0,sett:rip>0?null:lun(),done:{}};
   const b=db.batch(),R=col("planner"),refs=[];
   (rip===2?GG.map((_,g)=>g+"-"+pasto):[k]).forEach(sl=>{const r=R.doc();refs.push(r);b.set(r,Object.assign({slot:sl},base))});
   b.commit().then(()=>{chiudi();reg("Aggiunto al planner: "+x.n,()=>{const d=db.batch();refs.forEach(r=>d.delete(r));return d.commit()})}).catch(()=>alert("Non riesco ad aggiungere."));
 }
+const accettanti=p=>rsp(p).filter(m=>p.risposte&&p.risposte[m]&&p.risposte[m].v==="si");
 function piano(pid){
   const p=proposte.find(x=>x.id===pid);if(!p)return;
-  apri(`<h2 style="margin-top:0">${calSvg(22)} ${esc(p.n)}</h2><label class="l">Giorno<select id="gG">${GGF.map((g,i)=>`<option value="${i}" ${p.g===i?"selected":""}>${g}</option>`).join("")}</select></label><label class="l">Pasto<select id="gP">${PP.map(x=>`<option value="${x}" ${p.pa===x?"selected":""}>${PI[x]} ${x}</option>`).join("")}</select></label>${persone(false,true)}${selQuando}<button class="b w" onclick="aggiungiDaProposta('${pid}')">Aggiungi al planner</button>`);
+  const acc=accettanti(p),lista=sonoAdmin()?membri:[...new Set([utente,...(p.autore===utente?acc:[])])];
+  apri(`<h2 style="margin-top:0">${calSvg(22)} ${esc(p.n)}</h2><label class="l">Giorno<select id="gG">${GGF.map((g,i)=>`<option value="${i}" ${p.g===i?"selected":""}>${g}</option>`).join("")}</select></label><label class="l">Pasto<select id="gP">${PP.map(x=>`<option value="${x}" ${p.pa===x?"selected":""}>${PI[x]} ${x}</option>`).join("")}</select></label>${persone(lista,m=>m===utente||acc.includes(m))}${privSw()}${selQuando}<button class="b w" onclick="aggiungiDaProposta('${pid}')">Aggiungi al planner</button>`);
 }
 function aggiungiDaProposta(pid){
-  const p=proposte.find(x=>x.id===pid),pers=leggiPers();if(!p||!pers)return;
-  inserisci($("gG").value+"-"+$("gP").value,{n:p.n,i:p.i},pers,+$("aRip").value,false);
+  const p=proposte.find(x=>x.id===pid),l=leggiPers();if(!p||!l)return;
+  const acc=accettanti(p),pers=sonoAdmin()?l:l.filter(m=>m===utente||(p.autore===utente&&acc.includes(m)));   // per gli altri serve che abbiano accettato
+  if(!pers.length){alert("Puoi aggiungere solo te stesso o chi ha accettato.");return}
+  inserisci($("gG").value+"-"+$("gP").value,{n:p.n,i:p.i},pers,+$("aRip").value,false,$("aPriv").checked);
 }
 
 // ---- storico ----
 function uiStor(){
-  const w=[...new Set(plan.filter(e=>!e.fisso&&e.sett<lun()&&vis(e)).map(e=>e.sett))].sort().reverse();
+  const w=[...new Set(plan.filter(e=>!e.fisso&&e.sett<lun()&&visE(e)).map(e=>e.sett))].sort().reverse();
   $("stor").innerHTML=w.length?w.map(s=>{
     const a=new Date(s+"T00:00:00"),b=new Date(a);b.setDate(b.getDate()+6);
     const f=d=>d.getDate()+"/"+(d.getMonth()+1),op=apertoS===s;
-    return `<div class="card" onclick="apertoS=apertoS==='${s}'?'':'${s}';uiStor()"><b>Dal ${f(a)} al ${f(b)}/${b.getFullYear()}</b> ${op?"▲":"▼"}${op?`<table style="margin-top:10px">${tabHtml(k=>plan.filter(e=>e.slot===k&&e.sett===s&&vis(e)),false)}</table>`:""}</div>`}).join(""):'<p class="empty">Ancora nessuna settimana passata.</p>';
+    return `<div class="card" onclick="apertoS=apertoS==='${s}'?'':'${s}';uiStor()"><b>Dal ${f(a)} al ${f(b)}/${b.getFullYear()}</b> ${op?"▲":"▼"}${op?`<table style="margin-top:10px">${tabHtml(k=>plan.filter(e=>e.slot===k&&e.sett===s&&visE(e)),false)}</table>`:""}</div>`}).join(""):'<p class="empty">Ancora nessuna settimana passata.</p>';
 }
 function calSvg(sz){
   const d=new Date(),M=["GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO","SET","OTT","NOV","DIC"];
@@ -590,14 +615,15 @@ function uiNavIcons(){const k=new Date().toDateString();if(k===_nk)return;_nk=k;
 
 
 // ---- proposte ----
-function invia(id){
-  const x=piatti.find(p=>p.id===id);
+function invia(id,k){
+  const x=getX(id);
   if(!act||!x){alert("Prima entra in una famiglia.");return}
-  apri(`<h2 style="margin-top:0">Proponi "${esc(x.n)}"</h2>${persone(true,true)}${selGP(null,null,"i")}<button class="b w" onclick="spedisci('${id}')">Invia proposta</button>`);
+  const[g,pa]=k?k.split("-"):[null,null];
+  apri(`<h2 style="margin-top:0">Proponi "${esc(x.n)}"</h2>${persone(membri.filter(m=>m!==utente),()=>true)}${selGP(g!=null?+g:null,pa||null,"i")}<button class="b w" onclick="spedisci('${id}')">Invia proposta</button>`);
 }
 function spedisci(id){
   const l=leggiPers();if(!l)return;
-  const x=piatti.find(p=>p.id===id);if(!x)return;
+  const x=getX(id);if(!x)return;
   const R=col("proposte"),gp=leggiGP("i");chiudi();
   R.add({autore:utente,n:x.n,i:x.i,ts:Date.now(),risposte:{},per:perVal(l,true),g:gp.g,pa:gp.pa}).then(r=>reg("Proposta inviata: "+x.n,()=>R.doc(r.id).delete())).catch(()=>alert("Invio non riuscito."));
 }
@@ -634,7 +660,7 @@ function cardP(p,par){
   const r=p.risposte||{},mia=r[utente],rs=rsp(p);
   const pills=rs.map(m=>{const x=r[m],ch=proposte.find(c=>c.rif===p.id&&c.autore===m);return `<span class="pill">${ini(m)}${!x?"⏳":x.v==="si"?"✅":x.v==="no"?"❌":"💬"}${x&&x.v==="contro"&&ch?" "+esc(ch.n):""}</span>`}).join("");
   const on=v=>mia&&mia.v===v?" on":"";
-  const acc=(p.autore===utente&&rs.some(m=>r[m]&&r[m].v==="si"))||(mia&&mia.v==="si");
+  const acc=((p.autore===utente||sonoAdmin())&&rs.some(m=>r[m]&&r[m].v==="si"))||(mia&&mia.v==="si");
   const bt=rs.includes(utente)&&p.autore!==utente?`<div class="btns"><button class="bt si${on("si")}" onclick="rispondi('${p.id}','si')">✅<br>Accetto</button><button class="bt no${on("no")}" onclick="rispondi('${p.id}','no')">❌<br>Rifiuto</button><button class="bt co${on("contro")}" onclick="contro('${p.id}')">💬<br>Controproposta</button></div>`:"";
   return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · riservata":""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">${calSvg(16)} ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">${calSvg(18)} Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
 }
