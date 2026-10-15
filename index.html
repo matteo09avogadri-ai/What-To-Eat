@@ -49,17 +49,24 @@ input::placeholder{color:#9AAABB}
 .chip b{color:var(--red);cursor:pointer;padding:0 2px}
 table{width:calc(100% + 10px);margin:0 -5px;border-collapse:separate;border-spacing:5px;table-layout:fixed;font-size:12px}
 th{font-weight:700;color:var(--soft);font-size:12px;padding:2px 0;line-height:1.2}
-th.dg{color:var(--ink);font-size:13px}
+th.dg{color:var(--ink);font-size:13px;padding:0}
 th.oggi{color:#14263A;background:var(--saffron);border-radius:10px}
-td{background:var(--card);height:58px;border-radius:12px;padding:4px;vertical-align:middle;text-align:center;word-wrap:break-word;box-shadow:0 1px 4px rgba(30,60,100,.12);transition:transform .12s,background .15s}
-td:active{transform:scale(.96)}
-td.has{background:var(--ok)}
+td{background:var(--card);height:64px;border-radius:12px;padding:0;overflow:hidden;vertical-align:middle;text-align:center;box-shadow:0 1px 4px rgba(30,60,100,.12);transition:transform .12s}
+td:active{transform:scale(.97)}
 td.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(30,60,100,.12)}
-td div{margin:2px 0;padding:3px 5px;border-radius:8px;font-weight:700;line-height:1.2}
-.ent{background:color-mix(in srgb,var(--c) 24%,var(--card));border-left:4px solid var(--c)}
-.pts{display:flex;gap:3px;justify-content:center;margin-top:3px}.pts i{width:7px;height:7px;border-radius:50%}
+.ent{display:flex;align-items:center;justify-content:center;min-height:62px;padding:4px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);font-weight:700;line-height:1.2;word-break:break-word}
+td .ent:not(:only-child){min-height:38px}
+.ent.d{opacity:.55;text-decoration:line-through}
 .cols{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cols button{width:40px;height:40px;border-radius:50%;border:3px solid transparent;padding:0;transition:transform .15s,border-color .15s}.cols button.on{border-color:var(--ink);transform:scale(1.12)}
-td .d{text-decoration:line-through;opacity:.5}
+#full{position:fixed;inset:0;z-index:8;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));animation:up .3s cubic-bezier(.2,.8,.2,1)}
+.fh{display:flex;align-items:center;gap:10px;margin-bottom:6px}.fh h2{flex:1;margin:0}
+.big{border-radius:20px;padding:18px;margin-top:12px;min-height:130px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.big h3{font-family:Georgia,serif;font-size:25px;margin:0 0 8px}
+.big.d{opacity:.6}.big.d h3{text-decoration:line-through}
+.big .ing{background:rgba(255,255,255,.28);color:#fff;text-shadow:none}
+.big .pill{background:rgba(255,255,255,.92);color:#14263A;text-shadow:none}
+.big .g{background:rgba(255,255,255,.93);color:#14263A;text-shadow:none;border-color:transparent}.big .g.r{color:#B8402F}
+.bb{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .pl{color:var(--line);font-size:22px;font-weight:700}
 .m{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .m span.n{flex:1;font-weight:700}
@@ -142,6 +149,7 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
     <div id="prossimo"></div>
     <h2>La settimana</h2>
     <table id="tab"></table>
+    <div class="pills" id="leg"></div>
   </section>
   <section id="p-famiglia" class="hide">
     <div id="notif"></div>
@@ -186,6 +194,7 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
   <button id="t-proposte" onclick="vai('proposte')"><span><svg viewBox="0 0 32 32" width="28" height="28"><rect x="3" y="7" width="26" height="19" rx="4" fill="#4C9BE8"/><path d="M4 10l12 9 12-9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Proposte<b class="bd" id="bd"></b></button>
   <button id="t-storico" onclick="vai('storico')"><span id="ic-storico">📅</span>Storico</button>
 </nav>
+<div id="full" class="hide"></div>
 <div class="ov hide" id="mod"><div class="sheet" id="sheet"></div></div>
 
 <script>
@@ -223,7 +232,7 @@ const CAT={};
 // ---- stato ----
 let utente="",colore="",fams=[],act="",legacyP=[],prefs=new Set();                                // salvati sul telefono
 let membri=[],nomeFam="",custom=[],legacy=[],plan=[],proposte=[],piatti=[],adminNome="",colori={};       // dalla famiglia attiva
-let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editId="",primoD=true,modStack=[],pot=[],catSel="Tutti",tmpX=null,nuovoI=null,colTmp="",primoP=true,visti={},_nk="",_tt=null,_cf=null;
+let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editId="",primoD=true,modStack=[],pot=[],catSel="Tutti",tmpX=null,nuovoI=null,colTmp="",fullK="",primoP=true,visti={},_nk="",_tt=null,_cf=null;
 
 function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,colore,fams,act,legacyP}))}catch(e){}}
 function carica(){
@@ -258,6 +267,12 @@ const mio=e=>dest(e).includes(utente);
 const chiave=(e,m)=>(e.sett||lun())+"|"+m;
 const fattoPer=(e,m)=>!!(e.done&&e.done[chiave(e,m)]);
 const fatto=e=>{const d=dest(e);return d.includes(utente)?fattoPer(e,utente):d.length>0&&d.every(m=>fattoPer(e,m))};
+const etichCorta=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(e.fisso?" 📌":"")+(e.priv?" 🔒":"");
+// sfondo di un pasto: un colore per persona, in parti uguali (a strisce se sono più persone)
+function sfondo(e){
+  const l=arr(e)||membri,c=l.length?l.map(colM):["#7B8FA6"];
+  return c.length===1?c[0]:`linear-gradient(90deg,${c.map((x,i)=>`${x} ${(i*100/c.length).toFixed(2)}% ${((i+1)*100/c.length).toFixed(2)}%`).join(",")})`;
+}
 const etich=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(arr(e)?" · "+arr(e).map(m=>m===utente?"io":esc(m)).join(", "):"")+(e.fisso?" 📌":"")+(e.priv?" 🔒":"");
 const chips=l=>(l||[]).map(i=>`<span class="ing">${emoji(i)} ${esc(i)}</span>`).join("");
 const PAL=["#E76F51","#D9822B","#2A9D8F","#2C7BC1","#6C63FF","#B05FD0","#D6457F","#43A047","#8D6E63","#E53935","#00838F","#5C6BC0"];
@@ -279,6 +294,7 @@ function indietro(){
     if(p){$("sheet").className=p.c;$("sheet").innerHTML=p.h}else chiudi();
     return true;
   }
+  if(fullK){chiudiFull();return true}
   if(pag==="piatti"&&controId){controId="";controGP=null;mostra(nav.length?nav.pop():"proposte");return true}
   if(pag==="piatti"&&editId){annullaMod();return true}
   if(pag==="piatti"&&($("iQ").value||$("pCerca").value||catSel!=="Tutti")){$("iQ").value="";$("pCerca").value="";catSel="Tutti";uiIng();uiPList();return true}
@@ -530,7 +546,7 @@ function persone(lista,on){
   if(!lista.length)return '<p class="sub">Non ci sono altri familiari: invita qualcuno dalla pagina Famiglia.</p>';
   return '<div class="l" style="margin-top:12px">Per chi?</div>'+lista.map(m=>`<label class="sw"><span>${esc(m)}${m===utente?" (io)":""}</span><input type="checkbox" class="tg" data-n="${esc(m)}" ${on(m)?"checked":""}><i></i></label>`).join("");
 }
-const privSw=()=>`<label class="sw"><span>🔒 Personale: solo io lo vedo<br><small style="font-weight:400;color:var(--soft)">Vale se è solo per te</small></span><input type="checkbox" id="aPriv"><i></i></label>`;
+const privSw=on=>`<label class="sw"><span>🔒 Personale: solo io lo vedo<br><small style="font-weight:400;color:var(--soft)">Vale se è solo per te</small></span><input type="checkbox" id="aPriv" ${on?"checked":""}><i></i></label>`;
 const getX=id=>id==="ing"?tmpX:piatti.find(p=>p.id===id);
 function leggiPers(){const l=[...document.querySelectorAll("#sheet .tg:checked")].map(x=>x.dataset.n);if(!l.length){alert("Scegli almeno una persona.");return null}return l}
 const selQuando='<label class="l">Quando?<select id="aRip"><option value="0">Solo questa settimana</option><option value="1">📌 Fisso ogni settimana</option><option value="2">📌 Fisso tutti i giorni (questo pasto)</option></select></label>';
@@ -539,14 +555,13 @@ const selQuando='<label class="l">Quando?<select id="aRip"><option value="0">Sol
 const cellaE=k=>plan.filter(e=>e.slot===k&&visE(e)&&(e.fisso||e.sett===lun()));
 function tabHtml(get,click,nx){
   const oggi=(new Date().getDay()+6)%7;
-  let h="<tr><th></th>"+PP.map(p=>`<th>${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</th>`).join("")+"</tr>";
+  let h='<colgroup><col style="width:34px"><col><col><col></colgroup><tr><th></th>'+PP.map(p=>`<th>${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</th>`).join("")+"</tr>";
   for(let g=0;g<7;g++){h+=`<tr><th class="dg ${click&&g===oggi?'oggi':''}">${GG[g]}</th>`;
     for(const p of PP){const k=g+"-"+p,es=get(k);
-      h+=`<td class="${es.length?'has':''} ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="ent ${fatto(e)?'d':''}" style="--c:${(arr(e)&&arr(e).length===1)?colM(arr(e)[0]):"var(--main)"}">${etich(e)}${(arr(e)&&arr(e).length===1)?"":`<span class="pts">${(arr(e)||membri).map(m=>`<i style="background:${colM(m)}"></i>`).join("")}</span>`}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</td>`}
+      h+=`<td class="${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="ent ${fatto(e)?'d':''}" style="background:${sfondo(e)}">${etichCorta(e)}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</td>`}
     h+="</tr>"}
   return h;
 }
-const pendList=()=>proposte.filter(p=>p.autore!==utente&&rsp(p).includes(utente)&&!(p.risposte&&p.risposte[utente]));
 function uiHome(){
   const nuove=pendList().length;
   $("avviso").innerHTML=(nuove?`<div class="card" style="background:var(--saffron);color:#14263A;font-weight:700" onclick="vai('proposte')">🔔 ${nuove} ${nuove===1?"proposta da valutare":"proposte da valutare"}</div>`:"")+
@@ -557,6 +572,7 @@ function uiHome(){
   $("prossimo").innerHTML=f?`<div class="card next"><div class="when">Prossimo pasto · ${GG[f.g]} · ${f.p}</div>`+f.es.map(e=>`<h3>${etich(e)}</h3><div>${chips(e.i)}</div><button class="b w" onclick="completato('${e.id}')">Completato</button>`).join("")+`</div>`
     :`<div class="card next"><div class="when">Prossimo pasto</div><p class="empty">${act?"Nessun pasto in programma. Tocca una casella della tabella per aggiungerne uno.":"Entra in una famiglia dalla pagina Famiglia."}</p></div>`;
   $("tab").innerHTML=tabHtml(cellaE,true,f&&f.g+"-"+f.p);
+  $("leg").innerHTML=membri.map(m=>`<span class="pill">${ini(m)}${m===utente?"io":esc(m)}</span>`).join("");
 }
 function segna(id,lista,msg){
   const e=plan.find(x=>x.id===id);if(!e||!lista.length)return;
@@ -571,14 +587,42 @@ function completaAltri(id){
 }
 function cella(k){
   if(!act){alert("Prima entra in una famiglia.");return}
-  const[g,p]=k.split("-"),ad=sonoAdmin();
-  apri(`<h2 style="margin-top:0">${GG[g]} · ${p}</h2>`+cellaE(k).map(e=>{
-    const altri=dest(e).filter(m=>m!==utente&&!fattoPer(e,m)),b=[];
-    if(mio(e)&&!fattoPer(e,utente))b.push(`<button class="g" onclick="chiudi();completato('${e.id}')">✅ Completato</button>`);
-    if(ad&&altri.length)b.push(`<button class="g" onclick="chiudi();completaAltri('${e.id}')">✅ Per ${altri.length===1?esc(altri[0]):"gli altri"}</button>`);
-    if(ad||e.autore===utente)b.push(`<button class="g r" onclick="chiudi();togliPlan('${e.id}')">Togli</button>`);
-    return `<div class="card" style="margin-top:8px"><b>${etich(e)}</b>${fatto(e)?' <span class="when">· fatto</span>':""}<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${b.join("")}</div></div>`}).join("")+
-    `<button class="b w" onclick="scegli('${k}')">➕ Aggiungi un piatto</button><button class="g" style="width:100%;margin-top:8px" onclick="scegliIng('${k}')">🥚 Un singolo ingrediente</button><button class="g" style="width:100%;margin-top:8px" onclick="opzioni('${k}','fuori')">🍴 Pasto fuori casa</button>`);
+  fullK=k;ensure();uiFull();
+}
+function chiudiFull(){fullK="";uiFull()}
+function uiFull(){
+  const f=$("full");
+  if(!fullK){f.classList.add("hide");return}
+  const[g,p]=fullK.split("-"),ad=sonoAdmin(),es=cellaE(fullK);
+  f.innerHTML=`<div class="fh"><button class="g ib" onclick="chiudiFull()" aria-label="Chiudi">✕</button><h2>${GGF[g]} · ${PI[p]} ${p}</h2></div>`+
+    (es.length?es.map(e=>{
+      const altri=dest(e).filter(m=>m!==utente&&!fattoPer(e,m)),b=[];
+      if(mio(e)&&!fattoPer(e,utente))b.push(`<button class="g" onclick="completato('${e.id}')">✅ Completato</button>`);
+      if(ad&&altri.length)b.push(`<button class="g" onclick="completaAltri('${e.id}')">✅ Per ${altri.length===1?esc(altri[0]):"gli altri"}</button>`);
+      if(ad||e.autore===utente)b.push(`<button class="g" onclick="modificaPlan('${e.id}')">✏️ Modifica</button><button class="g r" onclick="togliPlan('${e.id}')">Togli</button>`);
+      return `<div class="big ${fatto(e)?"d":""}" style="background:${sfondo(e)}"><h3>${etichCorta(e)}</h3><div class="pills" style="margin:0 0 8px">${(arr(e)||membri).map(m=>`<span class="pill">${ini(m)}${m===utente?"io":esc(m)}${fattoPer(e,m)?" ✅":""}</span>`).join("")}</div><div>${chips(e.i)}</div><div class="bb">${b.join("")}</div></div>`}).join(""):'<p class="empty">Nessun piatto in questo pasto.</p>')+
+    `<button class="b w" onclick="scegli('${fullK}')">➕ Aggiungi un piatto</button><button class="g" style="width:100%;margin-top:8px" onclick="scegliIng('${fullK}')">🥚 Un singolo ingrediente</button><button class="g" style="width:100%;margin-top:8px" onclick="opzioni('${fullK}','fuori')">🍴 Pasto fuori casa</button>`;
+  f.classList.remove("hide");
+}
+function modificaPlan(id){
+  const e=plan.find(x=>x.id===id);if(!e)return;
+  apri(`<h2 style="margin-top:0">${esc(e.p)}</h2>${sonoAdmin()?persone(membri,m=>dest(e).includes(m)):'<p class="sub">Puoi cambiare se è personale o visibile a tutti.</p>'}${privSw(e.priv)}${e.grp?`<div class="l" style="margin-top:12px">Ingredienti</div><div>${e.i.map(n=>`<span class="chip">${emoji(n)} ${esc(n)}${e.i.length>1?` <b data-n="${esc(n)}" onclick="togliDaGruppo('${id}',this.dataset.n)">✕</b>`:""}</span>`).join("")}</div>`:""}<button class="b w" onclick="salvaModPlan('${id}')">Salva</button>`);
+}
+function salvaModPlan(id){
+  const e=plan.find(x=>x.id===id);if(!e||!(sonoAdmin()||e.autore===utente))return;
+  let per=e.per;
+  if(sonoAdmin()){const l=leggiPers();if(!l)return;per=perVal(l)}
+  const priv=$("aPriv").checked&&Array.isArray(per)&&per.length===1&&per[0]===e.autore;
+  const R=col("planner"),orig={per:e.per,priv:!!e.priv};
+  R.doc(id).update({per,priv});chiudi();
+  reg("Pasto modificato: "+e.p,()=>R.doc(id).update(orig));
+}
+function togliDaGruppo(id,n){
+  const e=plan.find(x=>x.id===id);if(!e||e.i.length<2)return;
+  const R=col("planner"),orig={i:e.i,p:e.p},i=e.i.filter(x=>x!==n);
+  e.i=i;e.p=i.join("|");R.doc(id).update({i,p:e.p});
+  reg(n+" tolto dal pasto",()=>R.doc(id).update(orig));
+  chiudi();modificaPlan(id);
 }
 function togliPlan(id){const e=plan.find(x=>x.id===id);if(!e||!(sonoAdmin()||e.autore===utente))return;const R=col("planner"),d=Object.assign({},e);delete d.id;R.doc(id).delete();reg("Piatto tolto: "+e.p,()=>R.doc(id).set(d))}
 function scegli(k){
@@ -735,7 +779,7 @@ function uiBadge(){
 function draw(){
   $("av").textContent=utente?utente[0].toUpperCase():"?";$("av").style.background=colM(utente);
   $("tit").textContent=pag==="home"?(nomeFam||TIT.home):TIT[pag];
-  uiHome();uiFam();uiPiatti();uiProp();uiStor();uiNotif();uiNavIcons();uiBadge();uiUndo();
+  uiHome();uiFam();uiPiatti();uiProp();uiStor();uiNotif();uiNavIcons();uiBadge();uiUndo();uiFull();
 }
 function ensure(){if(!history.state||history.state.s!==1)history.pushState({s:1},"")}
 function mostra(p){
