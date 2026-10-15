@@ -332,7 +332,7 @@ function attiva(){
   if(getSeen()===null)setSeen();
   unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";adminNome=x.admin||membri[0]||"";if(!x.admin&&membri[0]===utente)ref().update({admin:utente});
     colori=x.colori||{};if(colore&&utente&&colori[utente]!==colore)ref().update(new firebase.firestore.FieldPath("colori",utente),colore);
-    try{if(norm(utente)==="matteo"&&adminNome!==utente&&!localStorage.getItem("fixadm_"+act)){localStorage.setItem("fixadm_"+act,"1");ref().update({admin:utente})}}catch(e){} /* una tantum: Matteo diventa amministratore (da togliere dopo) */ const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
+    const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
   const sub=(n,fn,on)=>unsubs.push(col(n).onSnapshot(sn=>{if(on)on(sn);fn(sn.docs.map(d=>Object.assign({id:d.id},d.data())));draw()}));
   sub("ingredienti",a=>{custom=a;emoCustom={};a.forEach(x=>{if(x.e)emoCustom[norm(x.n||"")]=x.e})});
   sub("dispensa",a=>{legacy=a.map(x=>x.n).filter(Boolean)});   // vecchia dispensa: i cibi diventano ingredienti
