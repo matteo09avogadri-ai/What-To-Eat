@@ -562,6 +562,7 @@ function tabHtml(get,click,nx){
     h+="</tr>"}
   return h;
 }
+const pendList=()=>proposte.filter(p=>p.autore!==utente&&rsp(p).includes(utente)&&!(p.risposte&&p.risposte[utente]));
 function uiHome(){
   const nuove=pendList().length;
   $("avviso").innerHTML=(nuove?`<div class="card" style="background:var(--saffron);color:#14263A;font-weight:700" onclick="vai('proposte')">🔔 ${nuove} ${nuove===1?"proposta da valutare":"proposte da valutare"}</div>`:"")+
