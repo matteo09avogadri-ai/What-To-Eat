@@ -9,15 +9,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
-:root{--bg:#EEF6FD;--ink:#14263A;--soft:#5B6F84;--card:#FFFFFF;--line:#D3E2F0;--main:#2C7BC1;--saffron:#F2B705;--red:#B8402F;--ok:#DDEEFB;--no:#FBE7E2;--wbg:#FFF1BF;--wink:#7A5B00;--fbg:#EDE7F9;--fink:#5A3E99}
-@media (prefers-color-scheme:dark){:root{--bg:#0F1B28;--ink:#E6EFF8;--soft:#93A8BD;--card:#182838;--line:#2B4258;--main:#6FB6EE;--red:#EE8A78;--ok:#1B3A55;--no:#3E2420;--wbg:#3F3410;--wink:#F2C94C;--fbg:#2F2745;--fink:#C3B1F0}.b,.av{color:#0B1620}}
+:root{--bg:#EEF6FD;--ink:#14263A;--soft:#5B6F84;--card:#FFFFFF;--line:#D3E2F0;--main:#2C7BC1;--saffron:#F2B705;--red:#B8402F;--ok:#DDEEFB;--no:#FBE7E2;--wbg:#FFF1BF;--wink:#7A5B00;--fbg:#EDE7F9}
+@media (prefers-color-scheme:dark){:root{--bg:#0F1B28;--ink:#E6EFF8;--soft:#93A8BD;--card:#182838;--line:#2B4258;--main:#6FB6EE;--red:#EE8A78;--ok:#1B3A55;--no:#3E2420;--wbg:#3F3410;--wink:#F2C94C;--fbg:#2F2745}.b{color:#0B1620}}
 *{box-sizing:border-box}
 html,body{margin:0;overscroll-behavior-y:contain}
 body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif;font-size:16px;line-height:1.4;min-height:100%}
 header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px}
 header h1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Georgia,serif;font-size:22px;margin:0}
 .ib{padding:6px 11px;font-size:18px;line-height:1.2}
-.av{width:42px;height:42px;border-radius:50%;background:var(--main);color:#fff;font:700 20px Georgia,serif;display:flex;align-items:center;justify-content:center;flex:none;border:0}
+.av{color:#fff;width:42px;height:42px;border-radius:50%;background:var(--main);color:#fff;font:700 20px Georgia,serif;display:flex;align-items:center;justify-content:center;flex:none;border:0}
 .av.s{width:30px;height:30px;font-size:15px}
 main{padding:4px 16px calc(100px + env(safe-area-inset-bottom,0px))}
 h2{font-family:Georgia,serif;font-size:19px;margin:22px 0 8px}
@@ -56,7 +56,9 @@ td:active{transform:scale(.96)}
 td.has{background:var(--ok)}
 td.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(30,60,100,.12)}
 td div{margin:2px 0;padding:3px 5px;border-radius:8px;font-weight:700;line-height:1.2}
-td div.sf{background:var(--fbg);color:var(--fink)}
+.ent{background:color-mix(in srgb,var(--c) 24%,var(--card));border-left:4px solid var(--c)}
+.pts{display:flex;gap:3px;justify-content:center;margin-top:3px}.pts i{width:7px;height:7px;border-radius:50%}
+.cols{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cols button{width:40px;height:40px;border-radius:50%;border:3px solid transparent;padding:0;transition:transform .15s,border-color .15s}.cols button.on{border-color:var(--ink);transform:scale(1.12)}
 td .d{text-decoration:line-through;opacity:.5}
 .pl{color:var(--line);font-size:22px;font-weight:700}
 .m{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -128,7 +130,7 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
 </head>
 <body>
 <header>
-  <button class="av" id="av" onclick="cambiaNome()"></button>
+  <button class="av" id="av" onclick="profilo()"></button>
   <h1 id="tit" onclick="vai('famiglia')">Cosa mangio</h1>
   <button class="g ib hide" id="un" onclick="annulla()" aria-label="Annulla">↶</button>
   <button class="g ib" onclick="aggiorna()" aria-label="Aggiorna">↻</button>
@@ -164,11 +166,13 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
     <input id="iQ" placeholder="🔎 Cerca un ingrediente" oninput="uiIng()" style="margin-top:0">
     <div class="cats" id="cats"></div>
     <div class="grid" id="iGrid"></div>
-    <h2>I miei piatti</h2>
+    <h2>I piatti della famiglia</h2>
+    <input id="pCerca" placeholder="🔎 Cerca un piatto o un ingrediente" oninput="uiPList()" style="margin-top:0">
     <div id="pList"></div>
   </section>
   <section id="p-proposte" class="hide">
-    <p class="sub">Le proposte tue e della famiglia, tutte qui.</p>
+    <button class="b w" style="margin:0 0 8px" onclick="nuovaProposta()">➕ Nuova proposta</button>
+    <p class="sub">Le proposte tue e della famiglia, tutte qui. Rispondono solo le persone coinvolte.</p>
     <div id="propList"></div>
   </section>
   <section id="p-storico" class="hide">
@@ -217,14 +221,14 @@ const CAT={};
 "Verdure=pomodoro,patate,carote,cipolla,aglio,zucchine,cetrioli,broccoli,cavolfiore,insalata,spinaci,rucola,melanzane,peperoni,mais,funghi,zucca,avocado,basilico,prezzemolo,rosmarino,sedano,finocchi,carciofi|Frutta=mela,pera,banana,arancia,limone,fragole,uva,pesca,anguria,kiwi,ananas,mirtilli,ciliegie,mango|Carne=pollo,tacchino,manzo,maiale,salsicce,prosciutto,pancetta,guanciale,macinato,bistecca,wurstel,salame,speck,hamburger|Pesce=tonno,salmone,merluzzo,gamberi,calamari,polpo,acciughe,orata,branzino|Latticini=latte,uova,burro,yogurt,mozzarella,parmigiano,formaggio,ricotta,mascarpone,panna,pecorino|Pasta e pane=pasta,spaghetti,riso,farina,pane,pangrattato,cereali,gnocchi,polenta,biscotti,piadina,pizza,lievito,fette biscottate|Legumi=fagioli,ceci,lenticchie,piselli,fave,soia|Condimenti=olio,sale,pepe,aceto,zucchero,miele,marmellata,passata,sugo,brodo,olive,maionese,senape,pesto,capperi|Dolci e bevande=cioccolato,nutella,gelato,torta,caffè,tè,succo,vino,birra,acqua|Frutta secca=noci,mandorle,nocciole,arachidi,pistacchi".split("|").forEach(g=>{const[c,l]=g.split("=");CAT[c]=l.split(",")});
 
 // ---- stato ----
-let utente="",fams=[],act="",legacyP=[],prefs=new Set();                                // salvati sul telefono
-let membri=[],nomeFam="",custom=[],legacy=[],plan=[],proposte=[],piatti=[],adminNome="";       // dalla famiglia attiva
-let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editId="",primoD=true,modStack=[],pot=[],catSel="Tutti",tmpX=null,nuovoI=null,primoP=true,visti={},_nk="",_tt=null,_cf=null;
+let utente="",colore="",fams=[],act="",legacyP=[],prefs=new Set();                                // salvati sul telefono
+let membri=[],nomeFam="",custom=[],legacy=[],plan=[],proposte=[],piatti=[],adminNome="",colori={};       // dalla famiglia attiva
+let unsubs=[],pag="home",controId="",controGP=null,deferred=null,apertoS="",ultimoInvito="",undo=[],nav=[],editId="",primoD=true,modStack=[],pot=[],catSel="Tutti",tmpX=null,nuovoI=null,colTmp="",primoP=true,visti={},_nk="",_tt=null,_cf=null;
 
-function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,fams,act,legacyP}))}catch(e){}}
+function salva(){try{localStorage.setItem("cm3",JSON.stringify({utente,colore,fams,act,legacyP}))}catch(e){}}
 function carica(){
   try{const d=JSON.parse(localStorage.getItem("cm3")||localStorage.getItem("cm2")||"null");
-    if(d){utente=d.utente||"";legacyP=(d.legacyP||d.piatti||[]).map(x=>({n:x.n,i:x.i||[]}));fams=d.fams||(d.codice?[{c:d.codice,n:""}]:[]);act=d.act||(fams[0]&&fams[0].c)||""}}catch(e){}
+    if(d){utente=d.utente||"";colore=d.colore||"";legacyP=(d.legacyP||d.piatti||[]).map(x=>({n:x.n,i:x.i||[]}));fams=d.fams||(d.codice?[{c:d.codice,n:""}]:[]);act=d.act||(fams[0]&&fams[0].c)||""}}catch(e){}
 }
 const SEED=[{n:"Pasta al pomodoro",i:["pasta","pomodoro","basilico"]},{n:"Frittata",i:["uova","formaggio"]},{n:"Latte e cereali",i:["latte","cereali"]},{n:"Toast",i:["pane","prosciutto","formaggio"]}];
 // i piatti salvati sul telefono (versioni precedenti) passano alla famiglia, senza doppioni
@@ -245,7 +249,6 @@ function lun(){const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));retu
 const arr=p=>Array.isArray(p.per)?p.per:(p.per&&p.per!=="tutti"?[p.per]:null);
 const dest=p=>arr(p)||membri;
 const toMe=p=>{const a=arr(p);return !a||a.includes(utente)};
-const vis=p=>p.autore===utente||toMe(p);
 const rsp=p=>dest(p).filter(m=>m!==p.autore);
 const perVal=(l,escl)=>{const base=escl?membri.filter(m=>m!==utente):membri;return base.length&&base.every(m=>l.includes(m))?"tutti":l};
 const sonoAdmin=()=>adminNome===utente;
@@ -257,7 +260,9 @@ const fattoPer=(e,m)=>!!(e.done&&e.done[chiave(e,m)]);
 const fatto=e=>{const d=dest(e);return d.includes(utente)?fattoPer(e,utente):d.length>0&&d.every(m=>fattoPer(e,m))};
 const etich=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(arr(e)?" · "+arr(e).map(m=>m===utente?"io":esc(m)).join(", "):"")+(e.fisso?" 📌":"")+(e.priv?" 🔒":"");
 const chips=l=>(l||[]).map(i=>`<span class="ing">${emoji(i)} ${esc(i)}</span>`).join("");
-const ini=n=>`<span class="av s">${esc((n||"?")[0].toUpperCase())}</span>`;
+const PAL=["#E76F51","#D9822B","#2A9D8F","#2C7BC1","#6C63FF","#B05FD0","#D6457F","#43A047","#8D6E63","#E53935","#00838F","#5C6BC0"];
+const colM=m=>(m===utente&&colore)||colori[m]||"#7B8FA6";
+const ini=n=>`<span class="av s" style="background:${colM(n)}">${esc((n||"?")[0].toUpperCase())}</span>`;
 const ordP=()=>[...piatti].sort((a,b)=>(prefs.has(b.id)?1:0)-(prefs.has(a.id)?1:0));
 
 // ---- finestre, avvisi, annulla ----
@@ -269,13 +274,14 @@ function apri(h,c){
 function chiudi(){modStack=[];$("mod").classList.add("hide")}
 function indietro(){
   if(!$("mod").classList.contains("hide")){
+    if(!utente||!colore)return true;
     const p=modStack.pop();
     if(p){$("sheet").className=p.c;$("sheet").innerHTML=p.h}else chiudi();
     return true;
   }
   if(pag==="piatti"&&controId){controId="";controGP=null;mostra(nav.length?nav.pop():"proposte");return true}
   if(pag==="piatti"&&editId){annullaMod();return true}
-  if(pag==="piatti"&&($("iQ").value||catSel!=="Tutti")){$("iQ").value="";catSel="Tutti";uiIng();return true}
+  if(pag==="piatti"&&($("iQ").value||$("pCerca").value||catSel!=="Tutti")){$("iQ").value="";$("pCerca").value="";catSel="Tutti";uiIng();uiPList();return true}
   if(pag==="storico"&&apertoS){apertoS="";uiStor();return true}
   if(nav.length){mostra(nav.pop());return true}
   return false;
@@ -289,13 +295,23 @@ function uiUndo(){$("un").classList.toggle("hide",!undo.length)}
 function aggiorna(){toast("Aggiorno…");setTimeout(()=>location.reload(),300)}
 
 // ---- nome e avvio ----
-function chiediNome(){apri(`<h2 style="margin-top:0">Benvenuto!</h2><p class="sub">Come ti chiami?</p><input id="wN" placeholder="Il tuo nome"><button class="b w" onclick="impostaNome()">Inizia</button>`,true)}
-function impostaNome(){const v=$("wN").value.trim();if(!v)return;utente=v;salva();chiudi();avvia()}
-function cambiaNome(){apri(`<h2 style="margin-top:0">Il tuo nome</h2><input id="wN" value="${esc(utente)}"><button class="b w" onclick="salvaNome()">Salva</button>`,true)}
-function salvaNome(){
-  const v=$("wN").value.trim();if(!v)return;
-  const vecchio=utente;utente=v;salva();chiudi();
-  if(online)fams.forEach(f=>{const r=db.collection("famiglie").doc(f.c),FV=firebase.firestore.FieldValue;r.get().then(d=>{const x=d.data()||{},eraAdmin=(x.admin||(x.members||[])[0])===vecchio;return r.update({members:FV.arrayRemove(vecchio)}).then(()=>r.update(Object.assign({members:FV.arrayUnion(v)},eraAdmin?{admin:v}:{})))})});
+function profilo(){
+  colTmp=colore||PAL[Math.floor(Math.random()*PAL.length)];
+  apri(`<h2 style="margin-top:0">${utente?"Il tuo profilo":"Benvenuto!"}</h2><p class="sub">Nome e colore con cui comparirai nel planner.</p><input id="wN" value="${esc(utente)}" placeholder="Il tuo nome"><div class="cols">${PAL.map(c=>`<button style="background:${c}" data-c="${c}" class="${c===colTmp?"on":""}" onclick="scegliCol(this)" aria-label="colore"></button>`).join("")}</div><button class="b w" onclick="salvaProfilo()">Salva</button>`,true);
+}
+function scegliCol(el){colTmp=el.dataset.c;document.querySelectorAll("#sheet .cols button").forEach(b=>b.classList.toggle("on",b===el))}
+function salvaProfilo(){
+  const v=$("wN").value.trim();if(!v){alert("Scrivi il tuo nome.");return}
+  const vecchio=utente,primo=!utente;utente=v;colore=colTmp;salva();chiudi();
+  if(primo){avvia();return}
+  if(online)fams.forEach(f=>{
+    const r=db.collection("famiglie").doc(f.c),FV=firebase.firestore.FieldValue;
+    r.get().then(d=>{
+      const x=d.data()||{},eraAdmin=(x.admin||(x.members||[])[0])===vecchio;
+      const p=v!==vecchio?r.update({members:FV.arrayRemove(vecchio)}).then(()=>r.update(Object.assign({members:FV.arrayUnion(v)},eraAdmin?{admin:v}:{}))):Promise.resolve();
+      return p.then(()=>r.update(new firebase.firestore.FieldPath("colori",v),colore));
+    });
+  });
   draw();
 }
 function avvia(){
@@ -310,11 +326,13 @@ function avvia(){
 
 // ---- famiglie ----
 function attiva(){
-  unsubs.forEach(f=>f());unsubs=[];primoP=true;visti={};membri=[];custom=[];legacy=[];plan=[];proposte=[];piatti=[];primoD=true;nomeFam="";adminNome="";try{prefs=new Set(JSON.parse(localStorage.getItem("pf_"+act)||"[]"))}catch(e){prefs=new Set()}
+  unsubs.forEach(f=>f());unsubs=[];primoP=true;visti={};membri=[];custom=[];legacy=[];plan=[];proposte=[];piatti=[];primoD=true;nomeFam="";adminNome="";colori={};try{prefs=new Set(JSON.parse(localStorage.getItem("pf_"+act)||"[]"))}catch(e){prefs=new Set()}
   if(!online||!act){draw();return}
   if(!fams.find(x=>x.c===act)&&fams.length){act=fams[0].c;salva()}
   if(getSeen()===null)setSeen();
-  unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";adminNome=x.admin||membri[0]||"";if(!x.admin&&membri[0]===utente)ref().update({admin:utente});const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
+  unsubs.push(ref().onSnapshot(d=>{const x=d.data()||{};membri=x.members||[];nomeFam=x.nome||"";adminNome=x.admin||membri[0]||"";if(!x.admin&&membri[0]===utente)ref().update({admin:utente});
+    colori=x.colori||{};if(colore&&utente&&colori[utente]!==colore)ref().update(new firebase.firestore.FieldPath("colori",utente),colore);
+    try{if(norm(utente)==="matteo"&&adminNome!==utente&&!localStorage.getItem("fixadm_"+act)){localStorage.setItem("fixadm_"+act,"1");ref().update({admin:utente})}}catch(e){} /* una tantum: Matteo diventa amministratore (da togliere dopo) */ const f=fams.find(y=>y.c===act);if(f&&f.n!==nomeFam){f.n=nomeFam;salva()}draw()}));
   const sub=(n,fn,on)=>unsubs.push(col(n).onSnapshot(sn=>{if(on)on(sn);fn(sn.docs.map(d=>Object.assign({id:d.id},d.data())));draw()}));
   sub("ingredienti",a=>{custom=a;emoCustom={};a.forEach(x=>{if(x.e)emoCustom[norm(x.n||"")]=x.e})});
   sub("dispensa",a=>{legacy=a.map(x=>x.n).filter(Boolean)});   // vecchia dispensa: i cibi diventano ingredienti
@@ -467,7 +485,11 @@ function uiPiatti(){
   $("pot").className="pot"+(pot.length?" pieno":"");
   $("pot").innerHTML=pot.length?pot.map(n=>`<span class="chip">${emoji(n)} ${esc(n)} <b data-n="${esc(n)}" onclick="togIng(this.dataset.n)">✕</b></span>`).join(""):'<div class="vuoto">🥘 La pentola è vuota.<br>Tocca gli ingredienti qui sotto per aggiungerli.</div>';
   uiIng();
-  $("pList").innerHTML=ordP().map(x=>`<div class="card"><div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${prefs.has(x.id)?"⭐ ":""}${esc(x.n)}</b><button class="g" style="padding:4px 11px;font-size:18px" onclick="preferito('${x.id}')" aria-label="Preferito">${prefs.has(x.id)?"★":"☆"}</button></div>${x.autore&&x.autore!==utente?`<div class="when">di ${esc(x.autore)}</div>`:""}<div>${chips(x.i)}</div><button class="b" style="margin-top:10px" onclick="invia('${x.id}')">Proponi alla famiglia</button> ${puoMod(x)?`<button class="g" onclick="modifica('${x.id}')">✏️ Modifica</button> <button class="g r" onclick="togliPiatto('${x.id}')">Elimina</button>`:""}</div>`).join("")||'<p class="empty">Nessun piatto: creane uno qui sopra.</p>';
+  uiPList();
+}
+function uiPList(){
+  const q=norm($("pCerca").value),l=ordP().filter(x=>!q||x.n.toLowerCase().includes(q)||x.i.some(i=>i.includes(q)));
+  $("pList").innerHTML=l.map(x=>`<div class="card" style="border:2.5px solid ${x.autore?colM(x.autore):"var(--line)"}"><div style="display:flex;align-items:center;gap:8px"><b style="flex:1">${prefs.has(x.id)?"⭐ ":""}${esc(x.n)}</b><button class="g" style="padding:4px 11px;font-size:18px" onclick="preferito('${x.id}')" aria-label="Preferito">${prefs.has(x.id)?"★":"☆"}</button></div>${x.autore&&x.autore!==utente?`<div class="when">di ${esc(x.autore)}</div>`:""}<div>${chips(x.i)}</div><button class="b" style="margin-top:10px" onclick="invia('${x.id}')">Proponi alla famiglia</button> ${puoMod(x)?`<button class="g" onclick="modifica('${x.id}')">✏️ Modifica</button> <button class="g r" onclick="togliPiatto('${x.id}')">Elimina</button>`:""}</div>`).join("")||`<p class="empty">${q?"Nessun piatto trovato.":"Nessun piatto: creane uno qui sopra."}</p>`;
 }
 function salvaPref(){try{localStorage.setItem("pf_"+act,JSON.stringify([...prefs]))}catch(e){}}
 function preferito(id){const x=piatti.find(p=>p.id===id);if(!x)return;const v=prefs.has(id);v?prefs.delete(id):prefs.add(id);salvaPref();uiPiatti();reg((v?"Tolto dai preferiti: ":"Preferito: ")+x.n,()=>{v?prefs.add(id):prefs.delete(id);salvaPref();uiPiatti()})}
@@ -520,11 +542,11 @@ function tabHtml(get,click,nx){
   let h="<tr><th></th>"+PP.map(p=>`<th>${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</th>`).join("")+"</tr>";
   for(let g=0;g<7;g++){h+=`<tr><th class="dg ${click&&g===oggi?'oggi':''}">${GG[g]}</th>`;
     for(const p of PP){const k=g+"-"+p,es=get(k);
-      h+=`<td class="${es.length?'has':''} ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="${fatto(e)?'d':e.fuori?'sf':''}">${etich(e)}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</td>`}
+      h+=`<td class="${es.length?'has':''} ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="ent ${fatto(e)?'d':''}" style="--c:${(arr(e)&&arr(e).length===1)?colM(arr(e)[0]):"var(--main)"}">${etich(e)}${(arr(e)&&arr(e).length===1)?"":`<span class="pts">${(arr(e)||membri).map(m=>`<i style="background:${colM(m)}"></i>`).join("")}</span>`}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</td>`}
     h+="</tr>"}
   return h;
 }
-const pendList=()=>{const v=proposte.filter(vis);return v.filter(p=>p.autore!==utente&&rsp(p).includes(utente)&&!(p.risposte&&p.risposte[utente]))};
+const pendList=()=>proposte.filter(p=>p.autore!==utente&&rsp(p).includes(utente)&&!(p.risposte&&p.risposte[utente]));
 function uiHome(){
   const nuove=pendList().length;
   $("avviso").innerHTML=(nuove?`<div class="card" style="background:var(--saffron);color:#14263A;font-weight:700" onclick="vai('proposte')">🔔 ${nuove} ${nuove===1?"proposta da valutare":"proposte da valutare"}</div>`:"")+
@@ -560,14 +582,18 @@ function cella(k){
 }
 function togliPlan(id){const e=plan.find(x=>x.id===id);if(!e||!(sonoAdmin()||e.autore===utente))return;const R=col("planner"),d=Object.assign({},e);delete d.id;R.doc(id).delete();reg("Piatto tolto: "+e.p,()=>R.doc(id).set(d))}
 function scegli(k){
-  apri(`<h2 style="margin-top:0">Scegli un piatto</h2>`+(ordP().map(x=>`<div class="card" onclick="opzioni('${k}','${x.id}')"><b>${prefs.has(x.id)?"⭐ ":""}${esc(x.n)}</b><div>${chips(x.i)}</div></div>`).join("")||'<p class="empty">Non ci sono ancora piatti: creane uno nella scheda Piatti.</p>'));
+  apri(`<h2 style="margin-top:0">Scegli un piatto</h2><input id="sP" placeholder="🔎 Cerca un piatto" oninput="uiSPiatti('${k}')" style="margin-top:0"><div id="sPL"></div>`);uiSPiatti(k);
+}
+function uiSPiatti(k){
+  const q=norm($("sP").value);
+  $("sPL").innerHTML=ordP().filter(x=>!q||x.n.toLowerCase().includes(q)||x.i.some(i=>i.includes(q))).map(x=>`<div class="card" style="border:2.5px solid ${x.autore?colM(x.autore):"var(--line)"}" onclick="${k==="P"?`invia('${x.id}')`:`opzioni('${k}','${x.id}')`}"><b>${prefs.has(x.id)?"⭐ ":""}${esc(x.n)}</b><div>${chips(x.i)}</div></div>`).join("")||`<p class="empty">${q?"Nessun piatto trovato.":"Non ci sono ancora piatti: creane uno nella scheda Piatti."}</p>`;
 }
 function scegliIng(k){
   apri(`<h2 style="margin-top:0">Scegli l'ingrediente</h2><input id="sQ" placeholder="🔎 Cerca" oninput="uiSIng('${k}')" style="margin-top:0"><div class="grid" id="sRes"></div>`);uiSIng(k);
 }
 function uiSIng(k){
   const q=norm($("sQ").value);
-  $("sRes").innerHTML=ingList().filter(x=>!q||x.n.includes(q)).slice(0,60).map(x=>`<button class="tile" data-n="${esc(x.n)}" onclick="tmpX={n:this.dataset.n,i:[this.dataset.n]};opzioni('${k}','ing')"><span class="e">${emoji(x.n)}</span>${esc(x.n)}</button>`).join("");
+  $("sRes").innerHTML=ingList().filter(x=>!q||x.n.includes(q)).slice(0,60).map(x=>`<button class="tile" data-n="${esc(x.n)}" onclick="tmpX={n:this.dataset.n,i:[this.dataset.n],single:true};${k==="P"?"invia('ing')":`opzioni('${k}','ing')`}"><span class="e">${emoji(x.n)}</span>${esc(x.n)}</button>`).join("");
 }
 function opzioni(k,id){
   const f=id==="fuori",x=f?null:getX(id),t=f?"🍴 Pasto fuori casa":(x||{}).n||"",ad=sonoAdmin();
@@ -582,9 +608,18 @@ function aggiungiPlan(k,id){
 }
 function inserisci(k,x,pers,rip,fuori,priv){
   const pasto=k.split("-")[1],base={p:x.n,i:x.i,fuori:!!fuori,per:perVal(pers),priv:!!priv&&pers.length===1&&pers[0]===utente,autore:utente,fisso:rip>0,sett:rip>0?null:lun(),done:{}};
-  const b=db.batch(),R=col("planner"),refs=[];
-  (rip===2?GG.map((_,g)=>g+"-"+pasto):[k]).forEach(sl=>{const r=R.doc();refs.push(r);b.set(r,Object.assign({slot:sl},base))});
-  b.commit().then(()=>{chiudi();reg("Aggiunto al planner: "+x.n,()=>{const d=db.batch();refs.forEach(r=>d.delete(r));return d.commit()})}).catch(()=>alert("Non riesco ad aggiungere."));
+  const b=db.batch(),R=col("planner"),inv=[];
+  (rip===2?GG.map((_,g)=>g+"-"+pasto):[k]).forEach(sl=>{
+    // ingredienti singoli: si uniscono in un solo pasto "uova|zucchine|pane"
+    const ex=x.single&&plan.find(e=>e.grp&&e.slot===sl&&e.autore===utente&&!!e.fisso===(rip>0)&&(rip>0||e.sett===lun())&&!!e.priv===base.priv&&JSON.stringify(e.per)===JSON.stringify(base.per));
+    if(ex){
+      const ing=[...new Set([...ex.i,...x.i])];
+      b.update(R.doc(ex.id),{i:ing,p:ing.join("|")});inv.push(d=>d.update(R.doc(ex.id),{i:ex.i,p:ex.p}));
+    }else{
+      const r=R.doc();b.set(r,Object.assign({slot:sl},base,x.single?{grp:true}:{}));inv.push(d=>d.delete(r));
+    }
+  });
+  b.commit().then(()=>{chiudi();reg("Aggiunto al planner: "+x.n,()=>{const d=db.batch();inv.forEach(f=>f(d));return d.commit()})}).catch(()=>alert("Non riesco ad aggiungere."));
 }
 const accettanti=p=>rsp(p).filter(m=>p.risposte&&p.risposte[m]&&p.risposte[m].v==="si");
 function piano(pid){
@@ -615,6 +650,10 @@ function uiNavIcons(){const k=new Date().toDateString();if(k===_nk)return;_nk=k;
 
 
 // ---- proposte ----
+function nuovaProposta(){
+  if(!act){alert("Prima entra in una famiglia.");return}
+  apri(`<h2 style="margin-top:0">Cosa vuoi proporre?</h2><button class="b w" onclick="scegli('P')">🍽️ Un piatto</button><button class="g" style="width:100%;margin-top:8px" onclick="scegliIng('P')">🥚 Un singolo ingrediente</button>`,true);
+}
 function invia(id,k){
   const x=getX(id);
   if(!act||!x){alert("Prima entra in una famiglia.");return}
@@ -662,11 +701,11 @@ function cardP(p,par){
   const on=v=>mia&&mia.v===v?" on":"";
   const acc=((p.autore===utente||sonoAdmin())&&rs.some(m=>r[m]&&r[m].v==="si"))||(mia&&mia.v==="si");
   const bt=rs.includes(utente)&&p.autore!==utente?`<div class="btns"><button class="bt si${on("si")}" onclick="rispondi('${p.id}','si')">✅<br>Accetto</button><button class="bt no${on("no")}" onclick="rispondi('${p.id}','no')">❌<br>Rifiuto</button><button class="bt co${on("contro")}" onclick="contro('${p.id}')">💬<br>Controproposta</button></div>`:"";
-  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · riservata":""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">${calSvg(16)} ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">${calSvg(18)} Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
+  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · per "+arr(p).map(m=>m===utente?"te":esc(m)).join(", "):""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">${calSvg(16)} ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">${calSvg(18)} Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
 }
 function uiProp(){
   if(!act){$("propList").innerHTML='<p class="empty">Entra in una famiglia dalla pagina Famiglia.</p>';return}
-  const v=proposte.filter(vis),radici=v.filter(p=>!p.rif||!v.some(x=>x.id===p.rif));
+  const v=proposte,radici=v.filter(p=>!p.rif||!v.some(x=>x.id===p.rif));
   const figli=r=>v.filter(c=>c.rif===r.id).sort((a,b)=>a.ts-b.ts);
   const pe=p=>p.autore!==utente&&rsp(p).includes(utente)&&!(p.risposte&&p.risposte[utente]);
   const th=r=>cardP(r)+figli(r).map(c=>`<div class="cp">${cardP(c,r)}</div>`).join("");
@@ -680,7 +719,7 @@ function setSeen(){try{localStorage.setItem("pv_"+act,Date.now())}catch(e){}}
 // proposte "da leggere": nuove per me, o con risposte arrivate dopo l'ultima visita alla scheda
 function nonLetti(){
   const s=getSeen()||0,t=new Set();
-  proposte.filter(vis).forEach(p=>{
+  proposte.forEach(p=>{
     const nuovo=p.autore!==utente?(toMe(p)&&p.ts>s):Object.entries(p.risposte||{}).some(([m,r])=>m!==utente&&r.t>s);
     if(nuovo)t.add(p.rif||p.id);
   });
@@ -694,13 +733,13 @@ function uiBadge(){
 
 // ---- navigazione ----
 function draw(){
-  $("av").textContent=utente?utente[0].toUpperCase():"?";
+  $("av").textContent=utente?utente[0].toUpperCase():"?";$("av").style.background=colM(utente);
   $("tit").textContent=pag==="home"?(nomeFam||TIT.home):TIT[pag];
   uiHome();uiFam();uiPiatti();uiProp();uiStor();uiNotif();uiNavIcons();uiBadge();uiUndo();
 }
 function ensure(){if(!history.state||history.state.s!==1)history.pushState({s:1},"")}
 function mostra(p){
-  if(p!=="piatti"){$("iQ").value="";catSel="Tutti"}   // ricerca azzerata: rientrando si vedono tutti gli ingredienti
+  if(p!=="piatti"){$("iQ").value="";$("pCerca").value="";catSel="Tutti"}   // ricerca azzerata: rientrando si vedono tutti gli ingredienti
   pag=p;
   for(const n of Object.keys(TIT)){$("p-"+n).classList.toggle("hide",n!==p);if($("t-"+n))$("t-"+n).classList.toggle("on",n===p)}
   $("home").classList.toggle("hide",p==="home");
@@ -716,13 +755,13 @@ addEventListener("popstate",()=>{
   if(indietro()){history.pushState({s:1},"");return}
   toast("Premi ancora indietro per uscire");   // il gesto successivo esce dall'app
 });
-$("mod").addEventListener("click",e=>{if(e.target===$("mod"))chiudi()});
+$("mod").addEventListener("click",e=>{if(e.target===$("mod")&&utente&&colore)chiudi()});
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;draw()});
 addEventListener("appinstalled",()=>{deferred=null;draw()});
 function installa(){if(deferred){deferred.prompt();deferred=null;draw()}}
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)draw()});
 if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
-carica();draw();if(!utente)chiediNome();else avvia();
+carica();draw();if(!utente||!colore)profilo();if(utente)avvia();
 </script>
 </body>
 </html>
