@@ -47,15 +47,14 @@ input::placeholder{color:#9AAABB}
 .empty{color:var(--soft);padding:10px 0}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;margin:4px 6px 0 0;border-radius:18px;background:var(--ok);font-weight:700;font-size:15px}
 .chip b{color:var(--red);cursor:pointer;padding:0 2px}
-table{width:calc(100% + 10px);margin:0 -5px;border-collapse:separate;border-spacing:5px;table-layout:fixed;font-size:12px}
-th{font-weight:700;color:var(--soft);font-size:12px;padding:2px 0;line-height:1.2}
-th.dg{color:var(--ink);font-size:13px;padding:0}
-th.oggi{color:#14263A;background:var(--saffron);border-radius:10px}
-td{background:var(--card);height:64px;border-radius:12px;padding:0;overflow:hidden;vertical-align:middle;text-align:center;box-shadow:0 1px 4px rgba(30,60,100,.12);transition:transform .12s}
-td:active{transform:scale(.97)}
-td.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(30,60,100,.12)}
-.ent{display:flex;align-items:center;justify-content:center;min-height:62px;padding:4px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);font-weight:700;line-height:1.2;word-break:break-word}
-td .ent:not(:only-child){min-height:38px}
+.pg{display:grid;grid-template-columns:34px repeat(3,1fr);gap:5px;font-size:12px}
+.ph2{text-align:center;font-weight:700;color:var(--soft);line-height:1.2;padding:2px 0}
+.dg{display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ink);font-size:13px}
+.dg.oggi{color:#14263A;background:var(--saffron);border-radius:10px}
+.pc2{display:flex;flex-direction:column;min-height:64px;border-radius:12px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px rgba(30,60,100,.12);transition:transform .12s}
+.pc2:active{transform:scale(.97)}
+.pc2.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(30,60,100,.12)}
+.ent{flex:1;display:flex;align-items:center;justify-content:center;min-height:38px;padding:4px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);font-weight:700;line-height:1.2;word-break:break-word;text-align:center}
 .ent.d{opacity:.55;text-decoration:line-through}
 .cols{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cols button{width:40px;height:40px;border-radius:50%;border:3px solid transparent;padding:0;transition:transform .15s,border-color .15s}.cols button.on{border-color:var(--ink);transform:scale(1.12)}
 #full{position:fixed;inset:0;z-index:8;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));animation:up .3s cubic-bezier(.2,.8,.2,1)}
@@ -67,7 +66,7 @@ td .ent:not(:only-child){min-height:38px}
 .big .pill{background:rgba(255,255,255,.92);color:#14263A;text-shadow:none}
 .big .g{background:rgba(255,255,255,.93);color:#14263A;text-shadow:none;border-color:transparent}.big .g.r{color:#B8402F}
 .bb{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.pl{color:var(--line);font-size:22px;font-weight:700}
+.pl{color:var(--line);font-size:22px;font-weight:700;margin:auto}
 .m{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .m span.n{flex:1;font-weight:700}
 .cp{margin:0 0 0 18px;border-left:4px solid var(--saffron);padding-left:10px}
@@ -148,7 +147,7 @@ nav button.on .vap path:nth-child(3){animation-delay:.7s}
     <div id="avviso"></div>
     <div id="prossimo"></div>
     <h2>La settimana</h2>
-    <table id="tab"></table>
+    <div class="pg" id="tab"></div>
     <div class="pills" id="leg"></div>
   </section>
   <section id="p-famiglia" class="hide">
@@ -271,7 +270,10 @@ const etichCorta=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(e.fisso?" 📌":"")+(e.priv?"
 // sfondo di un pasto: un colore per persona, in parti uguali (a strisce se sono più persone)
 function sfondo(e){
   const l=arr(e)||membri,c=l.length?l.map(colM):["#7B8FA6"];
-  return c.length===1?c[0]:`linear-gradient(90deg,${c.map((x,i)=>`${x} ${(i*100/c.length).toFixed(2)}% ${((i+1)*100/c.length).toFixed(2)}%`).join(",")})`;
+  if(c.length===1)return c[0];
+  const n=c.length,t=Math.min(14,44/n),st=[];   // t = larghezza della sfumatura tra due colori
+  c.forEach((x,i)=>{st.push(`${x} ${(i===0?0:i*100/n+t/2).toFixed(1)}%`,`${x} ${(i===n-1?100:(i+1)*100/n-t/2).toFixed(1)}%`)});
+  return `linear-gradient(115deg,${st.join(",")})`;
 }
 const etich=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(arr(e)?" · "+arr(e).map(m=>m===utente?"io":esc(m)).join(", "):"")+(e.fisso?" 📌":"")+(e.priv?" 🔒":"");
 const chips=l=>(l||[]).map(i=>`<span class="ing">${emoji(i)} ${esc(i)}</span>`).join("");
@@ -555,11 +557,11 @@ const selQuando='<label class="l">Quando?<select id="aRip"><option value="0">Sol
 const cellaE=k=>plan.filter(e=>e.slot===k&&visE(e)&&(e.fisso||e.sett===lun()));
 function tabHtml(get,click,nx){
   const oggi=(new Date().getDay()+6)%7;
-  let h='<colgroup><col style="width:34px"><col><col><col></colgroup><tr><th></th>'+PP.map(p=>`<th>${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</th>`).join("")+"</tr>";
-  for(let g=0;g<7;g++){h+=`<tr><th class="dg ${click&&g===oggi?'oggi':''}">${GG[g]}</th>`;
+  let h="<div></div>"+PP.map(p=>`<div class="ph2">${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</div>`).join("");
+  for(let g=0;g<7;g++){h+=`<div class="dg ${click&&g===oggi?'oggi':''}">${GG[g]}</div>`;
     for(const p of PP){const k=g+"-"+p,es=get(k);
-      h+=`<td class="${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="ent ${fatto(e)?'d':''}" style="background:${sfondo(e)}">${etichCorta(e)}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</td>`}
-    h+="</tr>"}
+      h+=`<div class="pc2 ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="ent ${fatto(e)?'d':''}" style="background:${sfondo(e)}">${etichCorta(e)}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</div>`}
+  }
   return h;
 }
 const pendList=()=>proposte.filter(p=>p.autore!==utente&&rsp(p).includes(utente)&&!(p.risposte&&p.risposte[utente]));
@@ -651,9 +653,11 @@ function aggiungiPlan(k,id){
   if(!x)return;
   inserisci(k,x,pers,+$("aRip").value,f,$("aPriv").checked);
 }
-function inserisci(k,x,pers,rip,fuori,priv){
+function inserisci(k,x,pers,rip,fuori,priv,pid){
   const pasto=k.split("-")[1],base={p:x.n,i:x.i,fuori:!!fuori,per:perVal(pers),priv:!!priv&&pers.length===1&&pers[0]===utente,autore:utente,fisso:rip>0,sett:rip>0?null:lun(),done:{}};
-  const b=db.batch(),R=col("planner"),inv=[];
+  const b=db.batch(),R=col("planner"),inv=[],P=col("proposte"),p0=pid&&proposte.find(c=>c.id===pid),radice=p0?(p0.rif||p0.id):null;
+  const tolte=radice?proposte.filter(c=>c.id===radice||c.rif===radice).map(c=>{const d=Object.assign({},c);delete d.id;return{id:c.id,d}}):[];   // la proposta (e le sue controproposte) esce dall'elenco
+  tolte.forEach(t=>b.delete(P.doc(t.id)));
   (rip===2?GG.map((_,g)=>g+"-"+pasto):[k]).forEach(sl=>{
     // ingredienti singoli: si uniscono in un solo pasto "uova|zucchine|pane"
     const ex=x.single&&plan.find(e=>e.grp&&e.slot===sl&&e.autore===utente&&!!e.fisso===(rip>0)&&(rip>0||e.sett===lun())&&!!e.priv===base.priv&&JSON.stringify(e.per)===JSON.stringify(base.per));
@@ -664,7 +668,7 @@ function inserisci(k,x,pers,rip,fuori,priv){
       const r=R.doc();b.set(r,Object.assign({slot:sl},base,x.single?{grp:true}:{}));inv.push(d=>d.delete(r));
     }
   });
-  b.commit().then(()=>{chiudi();reg("Aggiunto al planner: "+x.n,()=>{const d=db.batch();inv.forEach(f=>f(d));return d.commit()})}).catch(()=>alert("Non riesco ad aggiungere."));
+  b.commit().then(()=>{chiudi();reg("Aggiunto al planner: "+x.n,()=>{const d=db.batch();inv.forEach(f=>f(d));tolte.forEach(t=>d.set(P.doc(t.id),t.d));return d.commit()})}).catch(()=>alert("Non riesco ad aggiungere."));
 }
 const accettanti=p=>rsp(p).filter(m=>p.risposte&&p.risposte[m]&&p.risposte[m].v==="si");
 function piano(pid){
@@ -676,7 +680,7 @@ function aggiungiDaProposta(pid){
   const p=proposte.find(x=>x.id===pid),l=leggiPers();if(!p||!l)return;
   const acc=accettanti(p),pers=sonoAdmin()?l:l.filter(m=>m===utente||(p.autore===utente&&acc.includes(m)));   // per gli altri serve che abbiano accettato
   if(!pers.length){alert("Puoi aggiungere solo te stesso o chi ha accettato.");return}
-  inserisci($("gG").value+"-"+$("gP").value,{n:p.n,i:p.i},pers,+$("aRip").value,false,$("aPriv").checked);
+  inserisci($("gG").value+"-"+$("gP").value,{n:p.n,i:p.i},pers,+$("aRip").value,false,$("aPriv").checked,pid);
 }
 
 // ---- storico ----
@@ -685,7 +689,7 @@ function uiStor(){
   $("stor").innerHTML=w.length?w.map(s=>{
     const a=new Date(s+"T00:00:00"),b=new Date(a);b.setDate(b.getDate()+6);
     const f=d=>d.getDate()+"/"+(d.getMonth()+1),op=apertoS===s;
-    return `<div class="card" onclick="apertoS=apertoS==='${s}'?'':'${s}';uiStor()"><b>Dal ${f(a)} al ${f(b)}/${b.getFullYear()}</b> ${op?"▲":"▼"}${op?`<table style="margin-top:10px">${tabHtml(k=>plan.filter(e=>e.slot===k&&e.sett===s&&visE(e)),false)}</table>`:""}</div>`}).join(""):'<p class="empty">Ancora nessuna settimana passata.</p>';
+    return `<div class="card" onclick="apertoS=apertoS==='${s}'?'':'${s}';uiStor()"><b>Dal ${f(a)} al ${f(b)}/${b.getFullYear()}</b> ${op?"▲":"▼"}${op?`<div class="pg" style="margin-top:10px">${tabHtml(k=>plan.filter(e=>e.slot===k&&e.sett===s&&visE(e)),false)}</div>`:""}</div>`}).join(""):'<p class="empty">Ancora nessuna settimana passata.</p>';
 }
 function calSvg(sz){
   const d=new Date(),M=["GEN","FEB","MAR","APR","MAG","GIU","LUG","AGO","SET","OTT","NOV","DIC"];
