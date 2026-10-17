@@ -54,17 +54,21 @@ input::placeholder{color:#9AAABB}
 .pc2{display:flex;flex-direction:column;min-height:64px;border-radius:12px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px rgba(30,60,100,.12);transition:transform .12s}
 .pc2:active{transform:scale(.97)}
 .pc2.nx{box-shadow:0 0 0 2.5px var(--saffron),0 1px 4px rgba(30,60,100,.12)}
-.ent{flex:1;display:flex;align-items:center;justify-content:center;min-height:38px;padding:4px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);font-weight:700;line-height:1.2;word-break:break-word;text-align:center}
-.ent.d{opacity:.55;text-decoration:line-through}
+.ent{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:46px;padding:5px 3px;color:var(--ink);text-align:center;line-height:1.2;word-break:break-word}
+.ent .nm{font-weight:700}
+.pc2 .ent+.ent{border-top:1px solid var(--line)}
+.ent.d{opacity:.55}.ent.d .nm{text-decoration:line-through}
+.cir{display:flex;flex-wrap:wrap;justify-content:center;gap:2px}
+.cir i{width:17px;height:17px;border-radius:50%;color:#fff;font:700 10px/17px "Trebuchet MS",system-ui,sans-serif;font-style:normal;text-align:center}
+.cir i.fin{opacity:.35}
+.ent.prop,.big.prop{background:color-mix(in srgb,var(--c) 20%,var(--card));border:1.5px dashed var(--c)}
+.ent.prop{opacity:.85}
 .cols{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.cols button{width:40px;height:40px;border-radius:50%;border:3px solid transparent;padding:0;transition:transform .15s,border-color .15s}.cols button.on{border-color:var(--ink);transform:scale(1.12)}
 #full{position:fixed;inset:0;z-index:8;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));animation:up .3s cubic-bezier(.2,.8,.2,1)}
 .fh{display:flex;align-items:center;gap:10px;margin-bottom:6px}.fh h2{flex:1;margin:0}
-.big{border-radius:20px;padding:18px;margin-top:12px;min-height:130px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.big{border-radius:20px;padding:18px;margin-top:12px;min-height:130px;background:var(--card);border:1.5px solid var(--line);box-shadow:0 2px 10px rgba(30,60,100,.10)}
 .big h3{font-family:Georgia,serif;font-size:25px;margin:0 0 8px}
 .big.d{opacity:.6}.big.d h3{text-decoration:line-through}
-.big .ing{background:rgba(255,255,255,.28);color:#fff;text-shadow:none}
-.big .pill{background:rgba(255,255,255,.92);color:#14263A;text-shadow:none}
-.big .g{background:rgba(255,255,255,.93);color:#14263A;text-shadow:none;border-color:transparent}.big .g.r{color:#B8402F}
 .bb{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .pl{color:var(--line);font-size:22px;font-weight:700;margin:auto}
 .m{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -267,14 +271,6 @@ const chiave=(e,m)=>(e.sett||lun())+"|"+m;
 const fattoPer=(e,m)=>!!(e.done&&e.done[chiave(e,m)]);
 const fatto=e=>{const d=dest(e);return d.includes(utente)?fattoPer(e,utente):d.length>0&&d.every(m=>fattoPer(e,m))};
 const etichCorta=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(e.fisso?" 📌":"")+(e.priv?" 🔒":"");
-// sfondo di un pasto: un colore per persona, in parti uguali (a strisce se sono più persone)
-function sfondo(e){
-  const l=arr(e)||membri,c=l.length?l.map(colM):["#7B8FA6"];
-  if(c.length===1)return c[0];
-  const n=c.length,t=Math.min(14,44/n),st=[];   // t = larghezza della sfumatura tra due colori
-  c.forEach((x,i)=>{st.push(`${x} ${(i===0?0:i*100/n+t/2).toFixed(1)}%`,`${x} ${(i===n-1?100:(i+1)*100/n-t/2).toFixed(1)}%`)});
-  return `linear-gradient(115deg,${st.join(",")})`;
-}
 const etich=e=>(e.fuori?"🍴 ":"")+esc(e.p)+(arr(e)?" · "+arr(e).map(m=>m===utente?"io":esc(m)).join(", "):"")+(e.fisso?" 📌":"")+(e.priv?" 🔒":"");
 const chips=l=>(l||[]).map(i=>`<span class="ing">${emoji(i)} ${esc(i)}</span>`).join("");
 const PAL=["#E76F51","#D9822B","#2A9D8F","#2C7BC1","#6C63FF","#B05FD0","#D6457F","#43A047","#8D6E63","#E53935","#00838F","#5C6BC0"];
@@ -555,12 +551,14 @@ const selQuando='<label class="l">Quando?<select id="aRip"><option value="0">Sol
 
 // ---- planner ----
 const cellaE=k=>plan.filter(e=>e.slot===k&&visE(e)&&(e.fisso||e.sett===lun()));
+const propE=k=>proposte.filter(p=>p.g!=null&&p.pa&&p.g+"-"+p.pa===k);   // proposte per un pasto preciso, non ancora confermate
+const circ=e=>`<span class="cir">${(arr(e)||membri).map(m=>`<i class="${fattoPer(e,m)?"fin":""}" style="background:${colM(m)}">${esc((m||"?")[0].toUpperCase())}</i>`).join("")}</span>`;
 function tabHtml(get,click,nx){
   const oggi=(new Date().getDay()+6)%7;
   let h="<div></div>"+PP.map(p=>`<div class="ph2">${PI[p]}<br>${p[0].toUpperCase()+p.slice(1)}</div>`).join("");
   for(let g=0;g<7;g++){h+=`<div class="dg ${click&&g===oggi?'oggi':''}">${GG[g]}</div>`;
-    for(const p of PP){const k=g+"-"+p,es=get(k);
-      h+=`<div class="pc2 ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length?es.map(e=>`<div class="ent ${fatto(e)?'d':''}" style="background:${sfondo(e)}">${etichCorta(e)}</div>`).join(""):(click?'<span class="pl">+</span>':"")}</div>`}
+    for(const p of PP){const k=g+"-"+p,es=get(k),gh=click?propE(k):[];
+      h+=`<div class="pc2 ${k===nx?'nx':''}" ${click?`onclick="cella('${k}')"`:""}>${es.length||gh.length?es.map(e=>`<div class="ent ${fatto(e)?'d':''}"><span class="nm">${etichCorta(e)}</span>${circ(e)}</div>`).join("")+gh.map(q=>`<div class="ent prop" style="--c:${colM(q.autore)}"><span class="nm">💬 ${esc(q.n)}</span><span class="cir"><i style="background:${colM(q.autore)}">${esc((q.autore||"?")[0].toUpperCase())}</i></span></div>`).join(""):(click?'<span class="pl">+</span>':"")}</div>`}
   }
   return h;
 }
@@ -596,14 +594,14 @@ function chiudiFull(){fullK="";uiFull()}
 function uiFull(){
   const f=$("full");
   if(!fullK){f.classList.add("hide");return}
-  const[g,p]=fullK.split("-"),ad=sonoAdmin(),es=cellaE(fullK);
+  const[g,p]=fullK.split("-"),ad=sonoAdmin(),es=cellaE(fullK),gh=propE(fullK);
   f.innerHTML=`<div class="fh"><button class="g ib" onclick="chiudiFull()" aria-label="Chiudi">✕</button><h2>${GGF[g]} · ${PI[p]} ${p}</h2></div>`+
-    (es.length?es.map(e=>{
+    (es.length||gh.length?es.map(e=>{
       const altri=dest(e).filter(m=>m!==utente&&!fattoPer(e,m)),b=[];
       if(mio(e)&&!fattoPer(e,utente))b.push(`<button class="g" onclick="completato('${e.id}')">✅ Completato</button>`);
       if(ad&&altri.length)b.push(`<button class="g" onclick="completaAltri('${e.id}')">✅ Per ${altri.length===1?esc(altri[0]):"gli altri"}</button>`);
       if(ad||e.autore===utente)b.push(`<button class="g" onclick="modificaPlan('${e.id}')">✏️ Modifica</button><button class="g r" onclick="togliPlan('${e.id}')">Togli</button>`);
-      return `<div class="big ${fatto(e)?"d":""}" style="background:${sfondo(e)}"><h3>${etichCorta(e)}</h3><div class="pills" style="margin:0 0 8px">${(arr(e)||membri).map(m=>`<span class="pill">${ini(m)}${m===utente?"io":esc(m)}${fattoPer(e,m)?" ✅":""}</span>`).join("")}</div><div>${chips(e.i)}</div><div class="bb">${b.join("")}</div></div>`}).join(""):'<p class="empty">Nessun piatto in questo pasto.</p>')+
+      return `<div class="big ${fatto(e)?"d":""}"><h3>${etichCorta(e)}</h3><div class="pills" style="margin:0 0 8px">${(arr(e)||membri).map(m=>`<span class="pill">${ini(m)}${m===utente?"io":esc(m)}${fattoPer(e,m)?" ✅":""}</span>`).join("")}</div><div>${chips(e.i)}</div><div class="bb">${b.join("")}</div></div>`}).join("")+gh.map(q=>`<div class="big prop" style="--c:${colM(q.autore)}"><h3>💬 ${esc(q.n)}</h3><div class="when">Proposta di ${q.autore===utente?"te":esc(q.autore)} · non ancora confermata</div><div>${chips(q.i)}</div><div class="bb"><button class="g" onclick="chiudiFull();vai('proposte')">Apri la proposta</button></div></div>`).join(""):'<p class="empty">Nessun piatto in questo pasto.</p>')+
     `<button class="b w" onclick="scegli('${fullK}')">➕ Aggiungi un piatto</button><button class="g" style="width:100%;margin-top:8px" onclick="scegliIng('${fullK}')">🥚 Un singolo ingrediente</button><button class="g" style="width:100%;margin-top:8px" onclick="opzioni('${fullK}','fuori')">🍴 Pasto fuori casa</button>`;
   f.classList.remove("hide");
 }
@@ -739,7 +737,7 @@ function controStesso(id){
 }
 function controPiatto(id,did){const x=piatti.find(p=>p.id===did);if(!x)return;const gp=leggiGP("c");chiudi();inviaContro(id,x,gp)}
 function controNuovo(id){controGP=leggiGP("c");chiudi();controId=id;vai("piatti")}
-function elimina(id){conferma("Eliminare la proposta?",()=>{
+function elimina(id){const p0=proposte.find(c=>c.id===id);if(!p0||!(p0.autore===utente||sonoAdmin()))return;conferma("Eliminare la proposta?",()=>{
   const R=col("proposte"),tutte=proposte.filter(c=>c.id===id||c.rif===id).map(c=>{const d=Object.assign({},c);delete d.id;return{id:c.id,d}});
   tutte.forEach(t=>R.doc(t.id).delete());
   reg("Proposta eliminata",()=>Promise.all(tutte.map(t=>R.doc(t.id).set(t.d))));
@@ -750,7 +748,7 @@ function cardP(p,par){
   const on=v=>mia&&mia.v===v?" on":"";
   const acc=((p.autore===utente||sonoAdmin())&&rs.some(m=>r[m]&&r[m].v==="si"))||(mia&&mia.v==="si");
   const bt=rs.includes(utente)&&p.autore!==utente?`<div class="btns"><button class="bt si${on("si")}" onclick="rispondi('${p.id}','si')">✅<br>Accetto</button><button class="bt no${on("no")}" onclick="rispondi('${p.id}','no')">❌<br>Rifiuto</button><button class="bt co${on("contro")}" onclick="contro('${p.id}')">💬<br>Controproposta</button></div>`:"";
-  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · per "+arr(p).map(m=>m===utente?"te":esc(m)).join(", "):""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">${calSvg(16)} ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">${calSvg(18)} Aggiungi al planner</button>`:""}${p.autore===utente?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
+  return `<div class="pc"><div class="ph">${ini(p.autore)}<div><div class="when">${par?"↪ ":""}${esc(p.autore)} ${par?"contropropone":"propone"}${arr(p)?" · per "+arr(p).map(m=>m===utente?"te":esc(m)).join(", "):""}</div>${par?`<div class="when" style="font-weight:400">in risposta a: ${esc(par.n)}</div>`:""}</div></div><h3>${esc(p.n)}</h3>${quando(p)?`<div class="when">${calSvg(16)} ${esc(quando(p))}</div>`:""}<div>${chips(p.i)}</div><div class="pills">${pills}</div>${bt}${acc?`<button class="b w" onclick="piano('${p.id}')">${calSvg(18)} Aggiungi al planner</button>`:""}${(p.autore===utente||sonoAdmin())?`<button class="g r" style="margin-top:12px" onclick="elimina('${p.id}')">Elimina</button>`:""}</div>`;
 }
 function uiProp(){
   if(!act){$("propList").innerHTML='<p class="empty">Entra in una famiglia dalla pagina Famiglia.</p>';return}
